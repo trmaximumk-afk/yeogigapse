@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0C0F1A">
+<title>여기갑세 - 여디디야 금요기도회</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --bg:#0C0F1A;--sf:#151929;--sfL:#1C2137;--bd:#262D45;
+  --pri:#6C63FF;--priL:#8B83FF;--priD:rgba(108,99,255,.15);
+  --acc:#FFB84D;--accD:rgba(255,184,77,.12);
+  --txt:#E8E6F0;--txtM:#8A8BA0;--txtD:#5A5B70;
+  --ok:#4ADE80;--okD:rgba(74,222,128,.12);
+  --err:#FF6B6B;
+  --on:#38BDF8;--onD:rgba(56,189,248,.12);
+  --off:#A78BFA;--offD:rgba(167,139,250,.12);
+  --admin:#F472B6;--adminD:rgba(244,114,182,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard Variable','Noto Sans KR',-apple-system,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;min-height:100dvh;-webkit-tap-highlight-color:transparent;
+  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+input,select,button,textarea{font-family:inherit}
+input::placeholder,textarea::placeholder{color:var(--txtD)}
+button{cursor:pointer}
+textarea{resize:vertical}
+
+.page{display:none;min-height:100vh;min-height:100dvh}.page.active{display:block}
+.container{max-width:440px;margin:0 auto;padding:20px}
+.center-wrap{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px}
+
+.back-row{padding:16px 20px 0;max-width:440px;margin:0 auto}
+.back-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:none;color:var(--txtM);font-size:13px;font-weight:600;padding:6px 10px 6px 2px;border-radius:8px;transition:background .15s}
+.back-btn:hover{background:var(--sfL)}
+.back-btn svg{width:18px;height:18px;stroke:var(--txtM);stroke-width:2;fill:none}
+
+.card{background:var(--sf);border-radius:16px;padding:28px 24px;border:1px solid var(--bd);width:100%;max-width:380px}
+.card h2{font-size:18px;font-weight:700;margin-bottom:4px}
+.card .sub{color:var(--txtM);font-size:12px;margin-bottom:20px}
+.field{margin-bottom:14px}
+.field label{color:var(--txtM);font-size:12px;display:block;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:var(--sfL);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:var(--txt);font-size:14px;outline:none;appearance:none;-webkit-appearance:none}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8BA0' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.field select option{background:var(--sfL);color:var(--txt)}
+.btn{width:100%;border:none;border-radius:10px;padding:12px 0;font-size:15px;font-weight:600;transition:opacity .15s}
+.btn-pri{background:var(--pri);color:#fff}
+.btn-acc{background:var(--acc);color:#000}
+.btn-ghost{background:transparent;color:var(--txtM);border:1px solid var(--bd)}
+.btn-admin{background:var(--admin);color:#fff}
+.btn-sm{padding:8px 14px;font-size:12px;font-weight:600;border-radius:8px;width:auto;border:none}
+.btn:disabled{opacity:.4;cursor:default}
+.link-row{text-align:center;margin-top:16px}
+.link-row span{color:var(--txtM);font-size:12px}
+.link-row a{color:var(--priL);font-size:12px;font-weight:600;text-decoration:none;cursor:pointer}
+.err-msg{color:var(--err);font-size:12px;margin-top:8px;display:none}
+optgroup{font-weight:700;color:var(--priL)}
+
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:10px 24px;border-radius:12px;font-size:14px;font-weight:600;display:none;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{display:block;animation:slideDown .3s ease}
+.toast.ok{background:#1a3a2a;border:1px solid var(--ok);color:var(--ok)}
+.toast.bad{background:#3a1a1a;border:1px solid var(--err);color:var(--err)}
+
+.home-icon{font-size:56px;margin-bottom:12px}
+.home-title{font-size:24px;font-weight:700;margin-bottom:4px}
+.home-sub{color:var(--pri);font-size:13px;font-weight:600;letter-spacing:2px;margin-bottom:36px}
+.home-actions{display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px}
+.home-divider{color:var(--txtD);font-size:11px;text-align:center;margin:4px 0}
+
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.dash-user{display:flex;align-items:center;gap:8px}
+.dash-avatar{width:36px;height:36px;border-radius:10px;background:var(--priD);display:flex;align-items:center;justify-content:center;font-size:16px}
+.dash-name{font-size:14px;font-weight:600}
+.dash-mokjang{color:var(--txtM);font-size:11px}
+.logout-btn{background:var(--sfL);border:1px solid var(--bd);border-radius:8px;padding:6px 12px;color:var(--txtM);font-size:11px;font-weight:600}
+
+.checkin-card{border-radius:16px;padding:24px 20px;border:1px solid;margin-bottom:20px}
+.checkin-card.pending{background:linear-gradient(135deg,var(--priD),var(--accD));border-color:var(--pri)}
+.checkin-card.done{background:var(--okD);border-color:rgba(74,222,128,.3)}
+.checkin-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.checkin-sub{color:var(--txtM);font-size:12px;margin-bottom:16px}
+.checkin-type-row{display:flex;gap:8px;margin-bottom:14px}
+.ct-btn{flex:1;padding:12px 8px;border-radius:12px;border:2px solid var(--bd);background:var(--sfL);color:var(--txtM);text-align:center;font-size:13px;font-weight:600;transition:all .15s}
+.ct-btn.sel-off{background:var(--offD);border-color:var(--off);color:var(--off)}
+.ct-btn.sel-on{background:var(--onD);border-color:var(--on);color:var(--on)}
+.checkin-textarea{width:100%;background:var(--sfL);border:1px solid var(--bd);border-radius:12px;padding:14px;color:var(--txt);font-size:14px;outline:none;min-height:100px;line-height:1.6}
+.checkin-textarea:focus{border-color:var(--pri)}
+.char-count{text-align:right;color:var(--txtD);font-size:11px;margin-top:4px}
+.checkin-btn{margin-top:12px}
+.done-note{background:rgba(0,0,0,.2);border-radius:12px;padding:14px 16px;margin-top:12px}
+.done-note p{color:var(--txt);font-size:13px;line-height:1.7;white-space:pre-wrap}
+.done-note-label{color:var(--ok);font-size:11px;font-weight:600;margin-bottom:6px}
+
+.my-card{background:var(--sf);border-radius:16px;padding:24px 20px;border:1px solid var(--bd);margin-bottom:16px}
+.my-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:4px}
+.my-stat{border-radius:10px;padding:12px 8px;text-align:center}
+.my-stat .v{font-size:24px;font-weight:700}
+.my-stat .l{font-size:10px;margin-top:2px}
+.progress-bg{background:var(--sfL);border-radius:6px;height:8px;overflow:hidden}
+.progress-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--pri),var(--priL));transition:width .5s ease}
+.progress-label{display:flex;justify-content:space-between;margin-top:4px}
+.progress-label span{color:var(--txtD);font-size:10px}
+
+.section-title{color:var(--txtM);font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.history-list{background:var(--sf);border-radius:14px;border:1px solid var(--bd);overflow:hidden}
+.h-row{padding:14px 16px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s}
+.h-row:last-child{border-bottom:none}
+.h-row:hover{background:var(--sfL)}
+.h-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.h-date{font-size:13px;font-weight:600}
+.h-note-preview{color:var(--txtM);font-size:12px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.h-note-icon{color:#F59E0B;font-size:11px;font-weight:600;display:flex;align-items:center;gap:3px}
+.badge{font-size:10px;padding:2px 8px;border-radius:5px;font-weight:600}
+.badge-off{background:var(--offD);color:var(--off)}
+.badge-on{background:var(--onD);color:var(--on)}
+
+.admin-bar{background:var(--adminD);border-radius:12px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.admin-bar span{color:var(--admin);font-size:13px;font-weight:600}
+.admin-tabs{display:flex;background:var(--sf);border-radius:12px;padding:3px;border:1px solid var(--bd);margin-bottom:16px}
+.admin-tab{flex:1;padding:10px 0;border-radius:10px;border:none;background:transparent;color:var(--txtM);font-size:12px;font-weight:600;transition:all .2s}
+.admin-tab.active{background:var(--admin);color:#fff}
+.a-card{background:var(--sf);border-radius:12px;padding:14px 16px;border:1px solid var(--bd);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.a-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.a-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.a-name{font-size:14px;font-weight:600}
+.a-sub{color:var(--txtM);font-size:11px;margin-top:2px}
+.a-actions{display:flex;gap:6px;flex-shrink:0}
+.type-toggle{display:flex;gap:8px;margin-bottom:12px}
+.type-btn{flex:1;padding:10px 0;border-radius:10px;font-size:13px;font-weight:600;background:var(--sfL);border:2px solid transparent;color:var(--txtD);transition:all .15s}
+.type-btn.sel-off{background:var(--offD);border-color:var(--off);color:var(--off)}
+.type-btn.sel-on{background:var(--onD);border-color:var(--on);color:var(--on)}
+.search-input{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;color:var(--txt);font-size:14px;outline:none}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:900;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.show{display:flex}
+.modal{background:var(--sf);border-radius:16px;padding:28px 24px;max-width:380px;width:100%;border:1px solid var(--bd)}
+.modal.center{text-align:center}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:4px}
+.modal .desc{color:var(--txtM);font-size:12px;margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;margin-top:20px}
+.modal-actions button{flex:1;border-radius:10px;padding:10px 0;font-size:14px;font-weight:600;border:none}
+.btn-cancel{background:var(--sfL);color:var(--txtM);border:1px solid var(--bd)!important}
+.type-select{display:flex;gap:8px;margin-bottom:16px}
+.type-opt{flex:1;padding:14px 8px;border-radius:12px;border:2px solid var(--bd);background:var(--sfL);color:var(--txtM);text-align:center;transition:all .15s}
+.type-opt .ic{font-size:22px;margin-bottom:4px}
+.type-opt .lb{font-size:12px;font-weight:600}
+.type-opt.sel-off{background:var(--offD);border-color:var(--off);color:var(--off)}
+.type-opt.sel-on{background:var(--onD);border-color:var(--on);color:var(--on)}
+.note-modal{max-height:80vh;overflow-y:auto}
+.note-modal .note-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.note-modal .note-body{background:var(--sfL);border-radius:12px;padding:16px;line-height:1.7;font-size:14px;white-space:pre-wrap}
+.note-modal .note-meta{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.a-note-row{background:var(--sf);border-radius:12px;padding:14px 16px;border:1px solid var(--bd);margin-bottom:8px;cursor:pointer;transition:border-color .2s}
+.a-note-row:hover{border-color:var(--pri)}
+.a-note-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.a-note-name{font-size:14px;font-weight:600}
+.a-note-preview{color:var(--txtM);font-size:12px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pw-reset-info{background:var(--accD);border-radius:10px;padding:12px 16px;margin-bottom:16px}
+.pw-reset-info p{color:var(--acc);font-size:13px;font-weight:600}
+.pw-reset-info span{color:var(--txtM);font-size:11px}
+
+.fri-nav{background:var(--sf);border-radius:14px;padding:12px 16px;border:1px solid var(--bd);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.fri-nav-btn{background:var(--sfL);border:1px solid var(--bd);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:var(--txtM);font-size:16px;transition:background .15s}
+.fri-nav-btn:hover{background:var(--bd)}
+.fri-nav-btn:disabled{opacity:.3;cursor:default}
+.fri-nav-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none}
+.fri-nav-center{text-align:center;flex:1}
+.fri-nav-date{font-size:15px;font-weight:700}
+.fri-nav-label{font-size:11px;margin-top:2px}
+.fri-nav-today{color:var(--ok)}
+.fri-nav-past{color:var(--acc)}
+
+.loading{text-align:center;padding:40px 0;color:var(--txtM);font-size:13px}
+
+@keyframes slideDown{from{opacity:0;transform:translate(-50%,-20px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast ok"></div>
+
+<!-- 홈 -->
+<div id="homePage" class="page active">
+  <div class="center-wrap">
+    <div style="text-align:center;width:100%;max-width:340px">
+      <div class="home-icon">🙏</div>
+      <div class="home-title">여기갑세</div>
+      <div class="home-sub">여디디야 금요기도회</div>
+      <div class="home-actions" style="margin:0 auto">
+        <button class="btn btn-pri" onclick="showPage('loginPage')">로그인</button>
+        <button class="btn btn-acc" onclick="showPage('registerPage')">회원가입</button>
+        <div class="home-divider">── 관리자 ──</div>
+        <button class="btn btn-ghost" onclick="showPage('adminLoginPage')" style="border-color:var(--admin);color:var(--admin)">🔒 관리자 입장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 로그인 -->
+<div id="loginPage" class="page">
+  <div class="back-row"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>뒤로</button></div>
+  <div class="center-wrap" style="min-height:calc(100vh - 52px);min-height:calc(100dvh - 52px)">
+    <div class="card">
+      <h2>👋 로그인</h2>
+      <p class="sub">이름과 비밀번호로 로그인하세요</p>
+      <div class="field"><label>이름</label><input type="text" id="loginName" placeholder="홍길동"></div>
+      <div class="field"><label>비밀번호 (4자리)</label><input type="password" id="loginPw" maxlength="4" placeholder="••••" inputmode="numeric" style="letter-spacing:6px;text-align:center"></div>
+      <div id="loginErr" class="err-msg">이름 또는 비밀번호가 일치하지 않습니다</div>
+      <button class="btn btn-pri" onclick="doUserLogin()" style="margin-top:8px">로그인</button>
+      <div class="link-row"><span>계정이 없나요? </span><a onclick="showPage('registerPage')">회원가입</a><br><a onclick="showPage('homePage')" style="color:var(--txtD);margin-top:8px;display:inline-block">← 처음으로</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- 회원가입 -->
+<div id="registerPage" class="page">
+  <div class="back-row"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>뒤로</button></div>
+  <div class="center-wrap" style="min-height:auto;padding-top:0;padding-bottom:40px">
+    <div class="card">
+      <h2>✨ 회원가입</h2>
+      <p class="sub">가입 즉시 금요기도회 1회 출석이 기록됩니다!</p>
+      <div class="field"><label>이름 *</label><input type="text" id="regName" placeholder="홍길동"></div>
+      <div class="field"><label>목장 선택 *</label>
+        <select id="regMokjang"><option value="" disabled selected>목장을 선택하세요</option>
+          <optgroup label="여디"><option>예장연</option><option>미정</option><option>하이킹</option><option>예아</option></optgroup>
+          <optgroup label="디야"><option>디야로</option><option>형누나</option><option>빛과소금빵</option><option>에너자이저</option></optgroup>
+          <optgroup label="특별"><option>새가족</option><option>새내기</option></optgroup>
+        </select>
+      </div>
+      <div class="field"><label>비밀번호 (숫자 4자리) *</label><input type="password" id="regPw" maxlength="4" placeholder="예: 1234" inputmode="numeric" style="letter-spacing:6px;text-align:center"></div>
+      <div class="field"><label>비밀번호 확인</label><input type="password" id="regPw2" maxlength="4" placeholder="비밀번호 재입력" inputmode="numeric" style="letter-spacing:6px;text-align:center"></div>
+      <div class="field"><label>출석 유형</label>
+        <div style="display:flex;gap:8px">
+          <button class="ct-btn sel-off" id="regTypeOff" onclick="setRegType('offline')">⛪ 현장</button>
+          <button class="ct-btn" id="regTypeOn" onclick="setRegType('online')">📡 온라인</button>
+        </div>
+      </div>
+      <div class="field"><label>설교 소감문 *</label><textarea id="regNote" class="checkin-textarea" placeholder="오늘 설교를 듣고 느낀 점, 은혜받은 말씀을 적어주세요..." style="min-height:80px" oninput="document.getElementById('regNoteCnt').textContent=this.value.length"></textarea><div class="char-count"><span id="regNoteCnt">0</span>자</div></div>
+      <div id="regErr" class="err-msg"></div>
+      <button class="btn btn-acc" onclick="doRegister()" style="margin-top:4px">가입하기 🎉</button>
+      <div class="link-row"><span>이미 계정이 있나요? </span><a onclick="showPage('loginPage')">로그인</a><br><a onclick="showPage('homePage')" style="color:var(--txtD);margin-top:8px;display:inline-block">← 처음으로</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- 유저 대시보드 -->
+<div id="userDash" class="page"><div class="container" style="padding-bottom:40px" id="uDashWrap"><div class="loading">불러오는 중...</div></div></div>
+
+<!-- 관리자 로그인 -->
+<div id="adminLoginPage" class="page">
+  <div class="back-row"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>뒤로</button></div>
+  <div class="center-wrap" style="min-height:calc(100vh - 52px);min-height:calc(100dvh - 52px)">
+    <div class="card" style="text-align:center">
+      <h2>🔒 관리자</h2><p class="sub">임원진 PIN을 입력하세요</p>
+      <div class="field"><input type="password" id="adminPin" maxlength="6" placeholder="••••" style="letter-spacing:8px;text-align:center;font-size:18px"></div>
+      <div id="adminErr" class="err-msg">PIN이 틀렸습니다</div>
+      <button class="btn btn-admin" onclick="doAdminLogin()">관리자 입장</button>
+      <div class="link-row"><a onclick="showPage('homePage')" style="color:var(--txtD)">← 처음으로</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- 관리자 대시보드 -->
+<div id="adminDash" class="page"><div class="container" style="padding-bottom:40px" id="adminDashWrap"><div class="loading">불러오는 중...</div></div></div>
+
+<!-- 모달: 관리자 출석확인 -->
+<div id="confirmModal" class="overlay" onclick="closeModal('confirmModal')">
+  <div class="modal center" onclick="event.stopPropagation()">
+    <p style="font-size:16px;font-weight:600;margin-bottom:4px" id="cfName"></p>
+    <p class="desc" style="margin-bottom:16px">출석 유형을 확인해주세요</p>
+    <div class="type-select">
+      <button class="type-opt sel-off" id="cfOff" onclick="setCfType('offline')"><div class="ic">⛪</div><div class="lb">현장</div></button>
+      <button class="type-opt" id="cfOn" onclick="setCfType('online')"><div class="ic">📡</div><div class="lb">온라인</div></button>
+    </div>
+    <p style="color:var(--txtM);font-size:11px;margin-bottom:4px;text-align:left">⚠️ 관리자 체크는 소감문 없이 출석 처리됩니다</p>
+    <div class="modal-actions" style="margin-top:12px">
+      <button class="btn-cancel" onclick="closeModal('confirmModal')">취소</button>
+      <button style="background:var(--pri);color:#fff" onclick="execAdminCheck()">출석 확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 모달: 비밀번호 초기화 -->
+<div id="resetPwModal" class="overlay" onclick="closeModal('resetPwModal')">
+  <div class="modal center" onclick="event.stopPropagation()">
+    <h3>🔑 비밀번호 초기화</h3><p class="desc">비밀번호를 1111로 초기화하시겠습니까?</p>
+    <div class="pw-reset-info"><p id="resetTarget"></p><span>초기화 비밀번호: 1111</span></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('resetPwModal')">취소</button><button style="background:var(--admin);color:#fff" onclick="execResetPw()">초기화</button></div>
+  </div>
+</div>
+
+<!-- 모달: 목장변경 -->
+<div id="changeMokModal" class="overlay" onclick="closeModal('changeMokModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>🏠 목장 변경</h3><p class="desc" id="changeMokTarget"></p>
+    <div class="field"><label>새 목장</label>
+      <select id="changeMokSelect">
+        <optgroup label="여디"><option>예장연</option><option>미정</option><option>하이킹</option><option>예아</option></optgroup>
+        <optgroup label="디야"><option>디야로</option><option>형누나</option><option>빛과소금빵</option><option>에너자이저</option></optgroup>
+        <optgroup label="특별"><option>새가족</option><option>새내기</option></optgroup>
+      </select>
+    </div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('changeMokModal')">취소</button><button style="background:var(--pri);color:#fff" onclick="execChangeMok()">변경</button></div>
+  </div>
+</div>
+
+<!-- 모달: 소감문 상세 -->
+<div id="noteModal" class="overlay" onclick="closeModal('noteModal')">
+  <div class="modal note-modal" onclick="event.stopPropagation()" id="noteModalContent"></div>
+</div>
+
+<script>
+// ═══════════ Supabase 초기화 ═══════════
+const SB_URL = 'https://tdpddanudkjhylcfyepk.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkcGRkYW51ZGtqaHlsY2Z5ZXBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4NDM5NjYsImV4cCI6MjA4NTQxOTk2Nn0.Y_xHImUKUm-HcozBMJ1uJJZkf_Fc7OFkeDFsv53Dbs4';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+const ADMIN_PIN = "2426";
+
+// ═══════════ 금요일 날짜 시스템 ═══════════
+function getRecentFridays(count=12){
+  const fridays=[]; const d=new Date(); d.setHours(0,0,0,0);
+  const day=d.getDay();
+  const thisFri=new Date(d);
+  if(day!==5){ const diff=day>=5?day-5:day+2; thisFri.setDate(d.getDate()-diff); }
+  for(let i=0;i<count;i++){
+    const f=new Date(thisFri); f.setDate(thisFri.getDate()-i*7);
+    fridays.push(f.toISOString().split('T')[0]);
+  }
+  return fridays;
+}
+const FRIDAYS=getRecentFridays(12);
+const LATEST_FRIDAY=FRIDAYS[0];
+let selFri=LATEST_FRIDAY, selFriIdx=0;
+
+function navFriday(dir){
+  const ni=selFriIdx-dir;
+  if(ni<0||ni>=FRIDAYS.length)return;
+  selFriIdx=ni; selFri=FRIDAYS[selFriIdx];
+  if(curUser) renderUserDash();
+  if(document.getElementById('adminDash').classList.contains('active')) renderAdmin();
+}
+function friNavHTML(){
+  const isL=selFriIdx===0, isO=selFriIdx>=FRIDAYS.length-1;
+  return `<div class="fri-nav">
+    <button class="fri-nav-btn" onclick="navFriday(-1)" ${isO?"disabled":""}><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="fri-nav-center"><div class="fri-nav-date">${fmtF(selFri)}</div><div class="fri-nav-label ${isL?"fri-nav-today":"fri-nav-past"}">${isL?"이번주 금요일":"지난 금요일"}</div></div>
+    <button class="fri-nav-btn" onclick="navFriday(1)" ${isL?"disabled":""}><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+  </div>`;
+}
+
+// ═══════════ 상태 ═══════════
+let curUser=null, adminTab="attend", adminSearch="", adminType="offline";
+let cfId=null, cfType="offline", resetId=null, changeMokId=null;
+let regType="offline", userCheckType="offline";
+let toastTimer=null;
+
+// ═══════════ 헬퍼 ═══════════
+const fmtS=d=>{const[,m,day]=d.split("-");return+m+"/"+( +day)};
+const fmtF=d=>{const[y,m,day]=d.split("-");return y+"년 "+( +m)+"월 "+( +day)+"일"};
+const badge=t=>`<span class="badge badge-${t==="online"?"on":"off"}">${t==="online"?"📡 온라인":"⛪ 현장"}</span>`;
+const esc=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+function showToast(msg,type="ok"){const el=document.getElementById("toast");el.textContent=msg;el.className="toast "+type+" show";clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2500)}
+
+// ═══════════ History API ═══════════
+let navStack=["homePage"], openModals=[], skipNextPop=false;
+function showPage(id,push=true){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".err-msg").forEach(e=>{e.style.display="none"});
+  openModals.forEach(mid=>document.getElementById(mid).classList.remove("show"));
+  openModals=[];
+  if(push){navStack.push(id);history.pushState({page:id},"");}
+  window.scrollTo(0,0);
+}
+function openModal(id){document.getElementById(id).classList.add("show");openModals.push(id);history.pushState({modal:id},"");}
+function closeModal(id){
+  const el=document.getElementById(id);if(!el.classList.contains("show"))return;
+  el.classList.remove("show");
+  const idx=openModals.indexOf(id);if(idx>-1){openModals.splice(idx,1);skipNextPop=true;history.back();}
+}
+function goBack(){history.back()}
+window.addEventListener("popstate",function(){
+  if(skipNextPop){skipNextPop=false;return}
+  if(openModals.length>0){openModals.pop();const els=document.querySelectorAll('.overlay.show');if(els.length)els[els.length-1].classList.remove('show');return}
+  if(navStack.length>1){navStack.pop();const prev=navStack[navStack.length-1];document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(prev).classList.add("active");window.scrollTo(0,0)}
+  else history.pushState({guard:true},"");
+});
+history.replaceState({page:"homePage"},"");history.pushState({guard:true},"");
+
+// ═══════════ 로그인 ═══════════
+document.getElementById("loginPw").addEventListener("keydown",e=>{if(e.key==="Enter")doUserLogin()});
+document.getElementById("regPw2").addEventListener("keydown",e=>{if(e.key==="Enter")doRegister()});
+document.getElementById("adminPin").addEventListener("keydown",e=>{if(e.key==="Enter")doAdminLogin()});
+
+async function doUserLogin(){
+  const name=document.getElementById("loginName").value.trim();
+  const pw=document.getElementById("loginPw").value;
+  const{data,error}=await sb.from('fp_users').select('*').eq('name',name).eq('pw',pw);
+  if(error||!data||data.length===0){document.getElementById("loginErr").style.display="block";return}
+  curUser=data[0]; showPage("userDash"); renderUserDash();
+}
+function userLogout(){curUser=null;navStack=["homePage"];showPage("homePage",false);history.replaceState({page:"homePage"},"");history.pushState({guard:true},"")}
+
+// ═══════════ 회원가입 ═══════════
+function setRegType(t){regType=t;document.getElementById("regTypeOff").className="ct-btn"+(t==="offline"?" sel-off":"");document.getElementById("regTypeOn").className="ct-btn"+(t==="online"?" sel-on":"")}
+
+async function doRegister(){
+  const name=document.getElementById("regName").value.trim();
+  const mok=document.getElementById("regMokjang").value;
+  const pw=document.getElementById("regPw").value;
+  const pw2=document.getElementById("regPw2").value;
+  const note=document.getElementById("regNote").value.trim();
+  const errEl=document.getElementById("regErr");
+  if(!name){errEl.textContent="이름을 입력하세요";errEl.style.display="block";return}
+  if(!mok){errEl.textContent="목장을 선택하세요";errEl.style.display="block";return}
+  if(!pw||pw.length!==4||!/^\d{4}$/.test(pw)){errEl.textContent="비밀번호는 숫자 4자리로 입력하세요";errEl.style.display="block";return}
+  if(pw!==pw2){errEl.textContent="비밀번호가 일치하지 않습니다";errEl.style.display="block";return}
+  if(!note||note.length<5){errEl.textContent="설교 소감문을 5자 이상 작성해주세요";errEl.style.display="block";return}
+  errEl.style.display="none";
+
+  const{data:ud,error:ue}=await sb.from('fp_users').insert({name,mokjang:mok,pw}).select().single();
+  if(ue){
+    if(ue.code==='23505'){errEl.textContent="이미 동일한 계정이 존재합니다";errEl.style.display="block";return}
+    errEl.textContent="오류가 발생했습니다: "+ue.message;errEl.style.display="block";return;
+  }
+  await sb.from('fp_attendance').insert({user_id:ud.id,friday_date:LATEST_FRIDAY,attend_type:regType,note});
+  curUser=ud;
+  showToast("가입 완료! 금요기도회 1회 출석 🎉");
+  showPage("userDash"); renderUserDash();
+}
+
+// ═══════════ 유저 대시보드 ═══════════
+async function renderUserDash(){
+  if(!curUser)return;
+  const u=curUser;
+  const{data:att}=await sb.from('fp_attendance').select('*').eq('user_id',u.id).order('friday_date',{ascending:false});
+  const h=att||[];
+  const tr=h.find(a=>a.friday_date===selFri);
+  const n=h.length;
+  const offN=h.filter(a=>a.attend_type==="offline").length;
+  const onN=h.filter(a=>a.attend_type==="online").length;
+  const isThisWeek=selFriIdx===0;
+
+  let html=`
+    <div class="dash-header">
+      <div class="dash-user">
+        <div class="dash-avatar">🙏</div>
+        <div><div class="dash-name">${esc(u.name)}</div><div class="dash-mokjang">${u.mokjang} 목장</div></div>
+      </div>
+      <button class="logout-btn" onclick="userLogout()">로그아웃</button>
+    </div>`;
+  html+=friNavHTML();
+
+  if(tr){
+    html+=`<div class="checkin-card done">
+      <div class="checkin-title">✅ ${isThisWeek?"이번주":"해당 주"} 출석 완료!</div>
+      <div class="checkin-sub">${fmtF(selFri)} · ${tr.attend_type==="online"?"📡 온라인":"⛪ 현장"} 참석</div>
+      ${tr.note?`<div class="done-note"><div class="done-note-label">📝 나의 소감문</div><p>${esc(tr.note)}</p></div>`:""}
+    </div>`;
+  } else {
+    html+=`<div class="checkin-card pending">
+      <div class="checkin-title">📌 ${isThisWeek?"이번주 출석체크":"지난 출석 등록"}</div>
+      <div class="checkin-sub">${fmtF(selFri)} 금요기도회 · 소감문을 작성하면 출석이 인정됩니다</div>
+      <div class="checkin-type-row">
+        <button class="ct-btn ${userCheckType==="offline"?"sel-off":""}" onclick="setUserCheckType('offline')">⛪ 현장 참석</button>
+        <button class="ct-btn ${userCheckType==="online"?"sel-on":""}" onclick="setUserCheckType('online')">📡 온라인 참석</button>
+      </div>
+      <textarea id="userNote" class="checkin-textarea" placeholder="${isThisWeek?"오늘":"해당 주"} 설교를 듣고 느낀 점, 은혜받은 말씀을 적어주세요...&#10;&#10;✍️ 5자 이상 작성해야 출석이 인정됩니다" oninput="document.getElementById('userNoteCnt').textContent=this.value.length"></textarea>
+      <div class="char-count"><span id="userNoteCnt">0</span>자</div>
+      <button class="btn btn-pri checkin-btn" onclick="doUserCheckin()">출석 완료하기 ✅</button>
+    </div>`;
+  }
+
+  html+=`<div class="my-card"><div class="my-stats">
+    <div class="my-stat" style="background:var(--priD)"><div class="v" style="color:var(--priL)">${n}</div><div class="l" style="color:var(--txtM)">전체</div></div>
+    <div class="my-stat" style="background:var(--offD)"><div class="v" style="color:var(--off)">${offN}</div><div class="l" style="color:var(--txtM)">⛪ 현장</div></div>
+    <div class="my-stat" style="background:var(--onD)"><div class="v" style="color:var(--on)">${onN}</div><div class="l" style="color:var(--txtM)">📡 온라인</div></div>
+  </div></div>`;
+
+  html+=`<div class="section-title" style="margin-top:4px">📅 출석 이력 <span style="color:var(--txtD);font-size:11px;font-weight:400">· 탭하면 소감문 확인</span></div>`;
+  if(!h.length) html+=`<p style="color:var(--txtD);font-size:13px;text-align:center;padding:20px">아직 출석 기록이 없습니다</p>`;
+  else{
+    html+=`<div class="history-list">`;
+    h.forEach(r=>{
+      html+=`<div class="h-row" onclick="openNoteById(${r.id})">
+        <div class="h-top"><span class="h-date">${fmtF(r.friday_date)}</span><div style="display:flex;align-items:center;gap:6px">${r.note?'<span class="h-note-icon">📝</span>':""}${badge(r.attend_type)}</div></div>
+        ${r.note?`<div class="h-note-preview">${esc(r.note)}</div>`:'<div class="h-note-preview" style="color:var(--txtD);font-style:italic">소감문 없음</div>'}
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  html+=`<div style="text-align:center;margin-top:24px"><button class="btn btn-ghost" style="width:auto;padding:8px 20px;font-size:12px" onclick="openMyMokChange()">🏠 목장 변경</button></div>`;
+  document.getElementById("uDashWrap").innerHTML=html;
+}
+
+function setUserCheckType(t){userCheckType=t;renderUserDash()}
+
+async function doUserCheckin(){
+  const ta=document.getElementById("userNote");
+  const note=ta?ta.value.trim():"";
+  if(!note||note.length<5){showToast("설교 소감문을 5자 이상 작성해주세요","bad");return}
+  const{error}=await sb.from('fp_attendance').insert({user_id:curUser.id,friday_date:selFri,attend_type:userCheckType,note});
+  if(error){if(error.code==='23505')showToast("이미 해당 주 출석이 등록되어 있습니다","bad");else showToast("오류: "+error.message,"bad");return}
+  showToast(`${userCheckType==="online"?"온라인":"현장"} 출석 완료! ✅`);
+  renderUserDash();
+}
+
+function openMyMokChange(){
+  changeMokId=curUser.id;
+  document.getElementById("changeMokTarget").textContent=curUser.name+" · 현재: "+curUser.mokjang;
+  document.getElementById("changeMokSelect").value=curUser.mokjang;
+  openModal("changeMokModal");
+}
+
+async function openNoteById(attId){
+  const{data}=await sb.from('fp_attendance').select('*, fp_users(name,mokjang)').eq('id',attId).single();
+  if(!data)return;
+  const u=data.fp_users||curUser;
+  document.getElementById("noteModalContent").innerHTML=`
+    <div class="note-header"><h3>📝 설교 소감문</h3><button style="background:var(--sfL);border:none;border-radius:8px;width:32px;height:32px;color:var(--txtM);font-size:16px;cursor:pointer" onclick="closeModal('noteModal')">✕</button></div>
+    <div class="note-meta"><span style="color:var(--txt);font-size:14px;font-weight:600">${esc(u.name)}</span>${badge(data.attend_type)}</div>
+    <p style="color:var(--txtM);font-size:12px;margin-bottom:12px">${fmtF(data.friday_date)} · ${u.mokjang} 목장</p>
+    <div class="note-body">${data.note?esc(data.note):'<span style="color:var(--txtD);font-style:italic">소감문이 없습니다 (관리자 체크)</span>'}</div>`;
+  openModal("noteModal");
+}
+
+// ═══════════ 관리자 ═══════════
+function doAdminLogin(){
+  if(document.getElementById("adminPin").value===ADMIN_PIN){showPage("adminDash");renderAdmin()}
+  else{document.getElementById("adminErr").style.display="block";setTimeout(()=>document.getElementById("adminErr").style.display="none",1500)}
+}
+function adminLogout(){navStack=["homePage"];showPage("homePage",false);history.replaceState({page:"homePage"},"");history.pushState({guard:true},"")}
+
+function switchAdminTab(k){adminTab=k;renderAdmin()}
+
+async function renderAdmin(){
+  const isThisWeek=selFriIdx===0;
+  const{data:allUsers}=await sb.from('fp_users').select('*').order('created_at',{ascending:true});
+  const{data:selAtt}=await sb.from('fp_attendance').select('*').eq('friday_date',selFri);
+  const{data:allAtt}=await sb.from('fp_attendance').select('*');
+  const users=allUsers||[], att=selAtt||[], allA=allAtt||[];
+
+  const cntMap={};allA.forEach(a=>{cntMap[a.user_id]=(cntMap[a.user_id]||0)+1});
+  const attMap={};att.forEach(a=>{attMap[a.user_id]=a});
+
+  let html=`
+    <div class="dash-header"><h1>🙏 여기갑세</h1><button class="logout-btn" style="border-color:var(--admin);color:var(--admin)" onclick="adminLogout()">로그아웃</button></div>
+    <div class="admin-bar"><span>👑 관리자 모드</span><span style="color:var(--txtM);font-size:11px">여디디야 금요기도회</span></div>
+    ${friNavHTML()}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div style="background:var(--sf);border-radius:12px;padding:14px 12px;border:1px solid var(--bd);text-align:center">
+        <div style="color:var(--pri);font-size:22px;font-weight:700">${users.length}</div><div style="color:var(--txtM);font-size:11px">총 가입</div>
+      </div>
+      <div style="background:var(--sf);border-radius:12px;padding:14px 12px;border:1px solid var(--bd);text-align:center">
+        <div style="color:var(--ok);font-size:22px;font-weight:700">${att.length}</div><div style="color:var(--txtM);font-size:11px">${isThisWeek?"이번주":"해당 주"} 출석</div>
+      </div>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab ${adminTab==="attend"?"active":""}" onclick="switchAdminTab('attend')">✅ 출석</button>
+      <button class="admin-tab ${adminTab==="notes"?"active":""}" onclick="switchAdminTab('notes')">📝 소감</button>
+      <button class="admin-tab ${adminTab==="members"?"active":""}" onclick="switchAdminTab('members')">👥 회원</button>
+    </div>`;
+
+  if(adminTab==="attend"){
+    const filt=users.filter(u=>!adminSearch||u.name.includes(adminSearch)||u.mokjang.includes(adminSearch));
+    html+=`<div class="type-toggle">
+      <button class="type-btn ${adminType==="offline"?"sel-off":""}" onclick="setAdminType('offline')">⛪ 현장</button>
+      <button class="type-btn ${adminType==="online"?"sel-on":""}" onclick="setAdminType('online')">📡 온라인</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <div style="background:var(--offD);border-radius:8px;padding:5px 10px"><span style="color:var(--off);font-size:11px;font-weight:600">⛪ ${att.filter(a=>a.attend_type==="offline").length}</span></div>
+      <div style="background:var(--onD);border-radius:8px;padding:5px 10px"><span style="color:var(--on);font-size:11px;font-weight:600">📡 ${att.filter(a=>a.attend_type==="online").length}</span></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px"><input class="search-input" placeholder="이름 또는 목장 검색" value="${esc(adminSearch)}" oninput="adminSearch=this.value;renderAdmin()"></div>`;
+    filt.forEach(u=>{
+      const tr=attMap[u.id], n=cntMap[u.id]||0;
+      html+=`<div class="a-card" style="${tr?'opacity:.7;border-color:rgba(74,222,128,.25)':''}">
+        <div class="a-left">
+          <div class="a-icon" style="background:${tr?'var(--okD)':'var(--priD)'}">${tr?"✅":"🙏"}</div>
+          <div><div class="a-name">${esc(u.name)} ${tr?badge(tr.attend_type):""} ${tr&&tr.note?'<span class="h-note-icon" style="font-size:10px">📝</span>':""}</div>
+          <div class="a-sub">${u.mokjang} · ${n}회</div></div>
+        </div>
+        <button class="btn-sm" style="background:${tr?'var(--okD)':'var(--pri)'};color:${tr?'var(--ok)':'#fff'}" ${tr?"disabled":""} onclick="${tr?"":"openAdminConfirm("+u.id+",'"+esc(u.name)+"')"}">${tr?"완료":"출석"}</button>
+      </div>`;
+    });
+  } else if(adminTab==="notes"){
+    const notes=att.filter(a=>a.note);
+    const userMap={};users.forEach(u=>{userMap[u.id]=u});
+    html+=`<p style="color:var(--txtM);font-size:13px;margin-bottom:12px">📝 ${isThisWeek?"이번주":"해당 주"} 소감문 ${notes.length}건</p>`;
+    if(!notes.length) html+=`<p style="color:var(--txtD);font-size:13px;text-align:center;padding:30px 0">작성된 소감문이 없습니다</p>`;
+    else notes.forEach(a=>{
+      const u=userMap[a.user_id]||{name:"?",mokjang:"?"};
+      html+=`<div class="a-note-row" onclick="openNoteById(${a.id})">
+        <div class="a-note-top"><span class="a-note-name">${esc(u.name)} <span style="color:var(--txtM);font-size:11px;font-weight:400">${u.mokjang}</span></span>${badge(a.attend_type)}</div>
+        <div class="a-note-preview">${esc(a.note)}</div>
+      </div>`;
+    });
+  } else {
+    const sorted=[...users].sort((a,b)=>(cntMap[b.id]||0)-(cntMap[a.id]||0));
+    html+=`<p style="color:var(--txtM);font-size:13px;margin-bottom:12px">총 ${users.length}명 가입</p>`;
+    sorted.forEach(u=>{
+      const n=cntMap[u.id]||0;
+      const offN=allA.filter(a=>a.user_id===u.id&&a.attend_type==="offline").length;
+      const onN=allA.filter(a=>a.user_id===u.id&&a.attend_type==="online").length;
+      html+=`<div class="a-card">
+        <div class="a-left"><div class="a-icon" style="background:var(--priD)">🙏</div>
+        <div><div class="a-name">${esc(u.name)} <span style="color:var(--pri);font-size:14px;font-weight:700;margin-left:4px">${n}회</span></div>
+        <div class="a-sub">${u.mokjang} · ⛪${offN} 📡${onN} · 가입 ${fmtS(u.created_at.split('T')[0])}</div></div></div>
+        <div class="a-actions">
+          <button class="btn-sm" style="background:var(--sfL);color:var(--txtM);border:1px solid var(--bd)" onclick="openChangeMokAdmin(${u.id},'${esc(u.name)}','${u.mokjang}')">목장</button>
+          <button class="btn-sm" style="background:var(--adminD);color:var(--admin)" onclick="openResetPw(${u.id},'${esc(u.name)}','${u.mokjang}')">PW</button>
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById("adminDashWrap").innerHTML=html;
+}
+
+function setAdminType(t){adminType=t;renderAdmin()}
+function openAdminConfirm(id,name){
+  cfId=id;cfType=adminType;
+  document.getElementById("cfName").textContent=name;
+  document.getElementById("cfOff").className="type-opt"+(cfType==="offline"?" sel-off":"");
+  document.getElementById("cfOn").className="type-opt"+(cfType==="online"?" sel-on":"");
+  openModal("confirmModal");
+}
+function setCfType(t){cfType=t;document.getElementById("cfOff").className="type-opt"+(t==="offline"?" sel-off":"");document.getElementById("cfOn").className="type-opt"+(t==="online"?" sel-on":"")}
+
+async function execAdminCheck(){
+  if(!cfId)return;
+  const{error}=await sb.from('fp_attendance').insert({user_id:cfId,friday_date:selFri,attend_type:cfType,note:""});
+  if(error){showToast("오류: "+error.message,"bad");closeModal("confirmModal");return}
+  showToast("출석 완료! ✅");
+  closeModal("confirmModal"); renderAdmin();
+}
+
+function openResetPw(id,name,mok){resetId=id;document.getElementById("resetTarget").textContent=name+" ("+mok+")";openModal("resetPwModal")}
+async function execResetPw(){
+  if(!resetId)return;
+  await sb.from('fp_users').update({pw:"1111"}).eq('id',resetId);
+  showToast("비밀번호가 1111로 초기화되었습니다");closeModal("resetPwModal");
+}
+
+function openChangeMokAdmin(id,name,mok){changeMokId=id;document.getElementById("changeMokTarget").textContent=name+" · 현재: "+mok;document.getElementById("changeMokSelect").value=mok;openModal("changeMokModal")}
+async function execChangeMok(){
+  if(!changeMokId)return;
+  const nv=document.getElementById("changeMokSelect").value;
+  await sb.from('fp_users').update({mokjang:nv}).eq('id',changeMokId);
+  if(curUser&&curUser.id===changeMokId){curUser.mokjang=nv;renderUserDash()}
+  showToast("목장이 "+nv+"(으)로 변경되었습니다");closeModal("changeMokModal");renderAdmin();
+}
+</script>
+</body>
+</html>
