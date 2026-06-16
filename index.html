@@ -6,17 +6,20 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0C0F1A">
-<title>여기갑세 - 여디디야 금요기도회</title>
-<meta property="og:title" content="여기갑세 🙏">
-<meta property="og:description" content="여디디야 금요기도회 출석체크">
+<title>정원 × 여기갑세</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="정원">
+<meta property="og:title" content="정원 × 여기갑세 🌿">
+<meta property="og:description" content="정원 온라인기도회 · 여디디야 금요기도회">
 <meta property="og:image" content="https://yeogigapse.vercel.app/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://yeogigapse.vercel.app">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="여기갑세 🙏">
-<meta name="twitter:description" content="여디디야 금요기도회 출석체크">
+<meta name="twitter:title" content="정원 × 여기갑세 🌿">
+<meta name="twitter:description" content="정원 온라인기도회 · 여디디야 금요기도회">
 <meta name="twitter:image" content="https://yeogigapse.vercel.app/og-image.png">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -188,6 +191,44 @@ optgroup{font-weight:700;color:var(--priL)}
 
 @keyframes slideDown{from{opacity:0;transform:translate(-50%,-20px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+
+/* ── 유저 탭 (금요기도회 / 정원) ── */
+.user-tabs{display:flex;background:var(--sf);border-radius:12px;padding:3px;border:1px solid var(--bd);margin-bottom:16px}
+.user-tab{flex:1;padding:11px 0;border-radius:10px;border:none;background:transparent;color:var(--txtM);font-size:13px;font-weight:600;transition:all .2s}
+.user-tab.active{background:var(--pri);color:#fff}
+/* ── 정원 ── */
+.g-hero{background:linear-gradient(135deg,var(--priD),var(--okD));border:1px solid var(--pri);border-radius:16px;padding:22px 20px;margin-bottom:16px}
+.g-hero h2{font-size:18px;font-weight:700;margin-bottom:8px}
+.g-hero .g-time{display:inline-block;background:rgba(0,0,0,.25);color:var(--priL);font-size:12px;font-weight:600;padding:4px 12px;border-radius:8px;margin-bottom:12px}
+.g-hero .g-flow{color:var(--txtM);font-size:12px;line-height:1.6;margin-bottom:16px}
+.g-enter{width:100%;border:none;border-radius:12px;padding:15px 0;font-size:16px;font-weight:700;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
+.g-enter:active{opacity:.85}
+.g-guide-link{display:block;text-align:center;margin-top:12px;color:var(--priL);font-size:12px;font-weight:600;text-decoration:none;cursor:pointer}
+.g-card{background:var(--sf);border-radius:16px;padding:20px;border:1px solid var(--bd);margin-bottom:16px}
+.g-card-title{font-size:14px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.g-card-sub{color:var(--txtM);font-size:12px;margin-bottom:14px}
+.g-leader{background:var(--sfL);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--txt)}
+.g-leader b{color:var(--priL)}
+.g-prayer{width:100%;background:var(--sfL);border:1px solid var(--bd);border-radius:12px;padding:14px;color:var(--txt);font-size:14px;outline:none;min-height:72px;line-height:1.6}
+.g-prayer:focus{border-color:var(--pri)}
+.g-done{background:var(--okD);border:1px solid rgba(74,222,128,.3);border-radius:12px;padding:16px;text-align:center}
+.g-done-t{color:var(--ok);font-weight:700;font-size:15px;margin-bottom:4px}
+.g-notice{background:var(--accD);border:1px solid rgba(255,184,77,.3);border-radius:12px;padding:14px 16px;color:var(--acc);font-size:13px;line-height:1.6}
+.g-recent{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.g-chip{background:var(--priD);color:var(--priL);font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px}
+.notif-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.notif-row .nt-txt{flex:1}
+.notif-row .nt-txt .t{font-size:14px;font-weight:600}
+.notif-row .nt-txt .s{color:var(--txtM);font-size:11px;margin-top:2px;line-height:1.5}
+.nt-btn{flex-shrink:0;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700}
+.nt-btn.on{background:var(--okD);color:var(--ok);border:1px solid rgba(74,222,128,.3)}
+.nt-btn.off{background:var(--pri);color:#fff}
+/* ── 정원 안내 페이지 ── */
+.guide-step{display:flex;gap:14px;margin-bottom:18px}
+.guide-step .gs-num{width:30px;height:30px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.guide-step .gs-t{font-size:14px;font-weight:700;margin-bottom:3px}
+.guide-step .gs-d{color:var(--txtM);font-size:12px;line-height:1.6}
+.guide-sec-title{font-size:13px;font-weight:700;color:var(--priL);margin:24px 0 12px}
 </style>
 </head>
 <body>
@@ -198,9 +239,9 @@ optgroup{font-weight:700;color:var(--priL)}
 <div id="homePage" class="page active">
   <div class="center-wrap">
     <div style="text-align:center;width:100%;max-width:340px">
-      <div class="home-icon">🙏</div>
-      <div class="home-title">여기갑세</div>
-      <div class="home-sub">여디디야 금요기도회</div>
+      <div class="home-icon">🌿</div>
+      <div class="home-title">정원 <span style="color:var(--txtD);font-weight:400;font-size:20px">×</span> 여기갑세</div>
+      <div class="home-sub" style="letter-spacing:0;font-size:12px">정원 온라인기도회 · 여디디야 금요기도회</div>
       <div class="home-actions" style="margin:0 auto">
         <button class="btn btn-pri" onclick="showPage('loginPage')">로그인</button>
         <button class="btn btn-acc" onclick="showPage('registerPage')">회원가입</button>
@@ -253,6 +294,35 @@ optgroup{font-weight:700;color:var(--priL)}
 
 <!-- 유저 대시보드 -->
 <div id="userDash" class="page"><div class="container" style="padding-bottom:40px" id="uDashWrap"><div class="loading">불러오는 중...</div></div></div>
+
+<!-- 정원 참여 방법 안내 -->
+<div id="gardenGuidePage" class="page">
+  <div class="back-row"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>뒤로</button></div>
+  <div class="container" style="padding-top:8px;padding-bottom:48px">
+    <div class="g-hero">
+      <h2>🌿 정원 온라인 기도회</h2>
+      <span class="g-time">매주 월~목 · 밤 10:00~10:20</span>
+      <p class="g-flow">하나님의 사랑하시는 자, 여디디야가 함께 기도하며 자라는 정원입니다.<br>성경봉독 → 찬양 → 기도 순서로, 짧지만 깊게 모입니다.</p>
+    </div>
+
+    <div class="guide-sec-title">참여하는 법</div>
+    <div class="guide-step"><div class="gs-num">1</div><div><div class="gs-t">밤 9시 55분, 앱을 열어요</div><div class="gs-d">정원 탭의 <b>“정원 입장”</b> 버튼을 누르면 구글미트로 바로 연결됩니다. 인도자는 미리 들어와 준비합니다.</div></div></div>
+    <div class="guide-step"><div class="gs-num">2</div><div><div class="gs-t">함께 기도해요 (10:00~10:20)</div><div class="gs-d">성경봉독으로 문을 열고, 찬양을 들으며 마음을 모으고, 함께 기도합니다. 20분, 부담 없이 깊게.</div></div></div>
+    <div class="guide-step"><div class="gs-num">3</div><div><div class="gs-t">참여 체크 & 기도제목</div><div class="gs-d">정원 탭에서 <b>참여 체크</b> 한 번이면 기록됩니다. 나누고 싶은 기도제목이 있으면 함께 적어주세요(선택).</div></div></div>
+
+    <div class="guide-sec-title">인도자라면</div>
+    <div class="guide-step"><div class="gs-num">📖</div><div><div class="gs-t">9시 55분까지 입장 준비</div><div class="gs-d">로테이션 순서에 따라 그날의 인도자가 먼저 들어와 회의를 엽니다.</div></div></div>
+    <div class="guide-step"><div class="gs-num">🎵</div><div><div class="gs-t">찬양은 “탭 공유 + 오디오 공유”</div><div class="gs-d">화면 공유 시 <b>Chrome ‘탭’을 선택하고 ‘오디오 공유’에 체크</b>해야 찬양 소리가 함께 전달됩니다. (창·전체화면 공유는 소리가 안 나갑니다)</div></div></div>
+    <div class="guide-step"><div class="gs-num">🚪</div><div><div class="gs-t">마칠 때는 “통화 종료” 말고 “나가기”</div><div class="gs-d">“통화 종료”를 누르면 다음 날 입장이 막힐 수 있어요. 꼭 <b>“나가기”</b>로만 빠져주세요.</div></div></div>
+
+    <div class="guide-sec-title">알림 받기 (홈 화면에 설치)</div>
+    <div class="g-notice" style="margin-bottom:14px">기도회 시작 5분 전(밤 9:55) 알림을 받으려면, 앱을 <b>홈 화면에 추가</b>한 뒤 정원 탭에서 <b>“알림 켜기”</b>를 눌러주세요. 아이폰은 홈 화면에 추가해야만 알림이 작동합니다.</div>
+    <div class="guide-step"><div class="gs-num">🍎</div><div><div class="gs-t">아이폰</div><div class="gs-d">Safari 하단 <b>공유</b> 버튼 → <b>“홈 화면에 추가”</b> → 홈 화면의 정원 아이콘으로 앱을 열고 알림 켜기.</div></div></div>
+    <div class="guide-step"><div class="gs-num">🤖</div><div><div class="gs-t">안드로이드</div><div class="gs-d">Chrome 메뉴(⋮) → <b>“홈 화면에 추가”</b> 또는 설치 안내 → 앱을 열고 알림 켜기.</div></div></div>
+
+    <button class="g-enter" style="margin-top:8px" onclick="enterGarden()">🌿 지금 정원 입장하기</button>
+  </div>
+</div>
 
 <!-- 관리자 로그인 -->
 <div id="adminLoginPage" class="page">
@@ -324,6 +394,12 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = supabase.createClient(SB_URL, SB_KEY);
 const ADMIN_PIN = "2026";
 
+// ═══════════ 정원(온라인 기도회) 설정 ═══════════
+const GARDEN_MEET_DEFAULT='https://meet.google.com/nco-bnnm-igs';
+const VAPID_PUBLIC='BOj9STiII0hyK1zPNOAxxD6sxNTc6vgSiCnK6Me7RaKTWpTW0vj71cmHuZLEr-RTfid1BmhGLod7g0jEKPIOxeg';
+const DIYA_MOK=['디야로','형누나','빛과소금빵','에너자이저'];
+const YEDI_MOK=['예장연','미정','하이킹','예아'];
+
 // ═══════════ 금요일 날짜 시스템 ═══════════
 const FIRST_FRIDAY='2026-05-08'; // 첫 출석 가능 금요일
 function getRecentFridays(count=12){
@@ -362,6 +438,7 @@ function friNavHTML(){
 let curUser=null, adminTab="attend", adminSearch="", adminType="offline";
 let cfId=null, cfType="offline", resetId=null, changeMokId=null;
 let regType="offline", userCheckType="offline";
+let userTab="attend", gardenCfg=null;
 let toastTimer=null;
 
 // ═══════════ 헬퍼 ═══════════
@@ -441,6 +518,26 @@ async function doRegister(){
 async function renderUserDash(){
   if(!curUser)return;
   const u=curUser;
+  let html=`
+    <div class="dash-header">
+      <div class="dash-user">
+        <div class="dash-avatar">🙏</div>
+        <div><div class="dash-name">${esc(u.name)}</div><div class="dash-mokjang">${u.mokjang} 목장</div></div>
+      </div>
+      <button class="logout-btn" onclick="userLogout()">로그아웃</button>
+    </div>
+    <div class="user-tabs">
+      <button class="user-tab ${userTab==='attend'?'active':''}" onclick="switchUserTab('attend')">🙏 금요기도회</button>
+      <button class="user-tab ${userTab==='garden'?'active':''}" onclick="switchUserTab('garden')">🌿 정원 기도회</button>
+    </div>`;
+  html += (userTab==='garden') ? await gardenTabHTML() : await attendTabHTML();
+  document.getElementById("uDashWrap").innerHTML=html;
+  if(userTab==='garden') refreshNotifBtn();
+}
+function switchUserTab(t){ userTab=t; renderUserDash(); }
+
+async function attendTabHTML(){
+  const u=curUser;
   const{data:att}=await sb.from('fp_attendance').select('*').eq('user_id',u.id).order('friday_date',{ascending:false});
   const h=att||[];
   const tr=h.find(a=>a.friday_date===selFri);
@@ -449,15 +546,7 @@ async function renderUserDash(){
   const onN=h.filter(a=>a.attend_type==="online").length;
   const isThisWeek=selFriIdx===0;
 
-  let html=`
-    <div class="dash-header">
-      <div class="dash-user">
-        <div class="dash-avatar">🙏</div>
-        <div><div class="dash-name">${esc(u.name)}</div><div class="dash-mokjang">${u.mokjang} 목장</div></div>
-      </div>
-      <button class="logout-btn" onclick="userLogout()">로그아웃</button>
-    </div>`;
-  html+=friNavHTML();
+  let html=friNavHTML();
 
   if(tr){
     html+=`<div class="checkin-card done">
@@ -498,10 +587,20 @@ async function renderUserDash(){
     html+=`</div>`;
   }
   html+=`<div style="text-align:center;margin-top:24px"><button class="btn btn-ghost" style="width:auto;padding:8px 20px;font-size:12px" onclick="openMyMokChange()">🏠 목장 변경</button></div>`;
-  document.getElementById("uDashWrap").innerHTML=html;
+  return html;
 }
 
-function setUserCheckType(t){userCheckType=t;renderUserDash()}
+function setUserCheckType(t){
+  userCheckType=t;
+  // 전체 리렌더 하지 않고 버튼 상태만 토글
+  document.querySelectorAll('.checkin-type-row .ct-btn').forEach(btn=>{
+    if(btn.textContent.includes('현장')){
+      btn.className='ct-btn'+(t==='offline'?' sel-off':'');
+    } else {
+      btn.className='ct-btn'+(t==='online'?' sel-on':'');
+    }
+  });
+}
 
 async function doUserCheckin(){
   const ta=document.getElementById("userNote");
@@ -530,6 +629,143 @@ async function openNoteById(attId){
     <p style="color:var(--txtM);font-size:12px;margin-bottom:12px">${fmtF(data.friday_date)} · ${u.mokjang} 목장</p>
     <div class="note-body">${data.note?esc(data.note):'<span style="color:var(--txtD);font-style:italic">소감문이 없습니다 (관리자 체크)</span>'}</div>`;
   openModal("noteModal");
+}
+
+// ═══════════ 정원 (온라인 기도회) ═══════════
+function gardenTodayDate(){
+  const d=new Date(); const day=d.getDay(); // 0 일 ~ 6 토
+  if(day<1||day>4) return null; // 월(1)~목(4)만
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
+const WD=['일','월','화','수','목','금','토'];
+function gardenDateLabel(ds){ const[y,m,d]=ds.split('-').map(Number); const wd=WD[new Date(y,m-1,d).getDay()]; return `${m}월 ${d}일 (${wd})`; }
+function gardenChipLabel(ds){ const[,m,d]=ds.split('-').map(Number); return `${m}/${d}`; }
+function scopeAllows(scope,mok){
+  if(scope==='all')return true;
+  if(scope==='diya_yedi')return DIYA_MOK.includes(mok)||YEDI_MOK.includes(mok);
+  return DIYA_MOK.includes(mok); // 기본 diya
+}
+async function loadGardenCfg(){
+  try{ const{data}=await sb.from('gd_config').select('key,value'); const o={}; (data||[]).forEach(r=>o[r.key]=r.value); return o; }
+  catch(e){ return {}; }
+}
+function enterGarden(){
+  const meet=(gardenCfg&&gardenCfg.meet_link)?gardenCfg.meet_link:GARDEN_MEET_DEFAULT;
+  window.open(meet,'_blank','noopener');
+}
+
+async function gardenTabHTML(){
+  if(gardenCfg===null) gardenCfg=await loadGardenCfg();
+  const scope=(gardenCfg&&gardenCfg.scope)?gardenCfg.scope:'diya';
+  const allowed=scopeAllows(scope,curUser.mokjang);
+  const today=gardenTodayDate();
+
+  let leader='', myPart=null, recent=[];
+  if(today!==null){
+    const{data:sess}=await sb.from('gd_sessions').select('*').eq('meet_date',today).maybeSingle();
+    if(sess&&sess.leader_name) leader=sess.leader_name;
+    const{data:mine}=await sb.from('gd_participation').select('*').eq('user_id',curUser.id).eq('meet_date',today).maybeSingle();
+    myPart=mine||null;
+  }
+  const{data:rec}=await sb.from('gd_participation').select('meet_date').eq('user_id',curUser.id).order('meet_date',{ascending:false}).limit(8);
+  recent=rec||[];
+
+  let html=`
+  <div class="g-hero">
+    <h2>🌿 정원 온라인 기도회</h2>
+    <span class="g-time">매주 월~목 · 밤 10:00~10:20</span>
+    <p class="g-flow">성경봉독 → 찬양 → 기도. 짧지만 깊게,<br>함께 기도하며 자라는 정원입니다.</p>
+    <button class="g-enter" onclick="enterGarden()">🌿 정원 입장</button>
+    <a class="g-guide-link" onclick="showPage('gardenGuidePage')">참여 방법 자세히 보기 →</a>
+  </div>`;
+
+  if(!allowed){
+    html+=`<div class="g-card"><div class="g-notice">정원 기도회는 현재 <b>디야 마을</b> 사명자 중심으로 운영 중입니다. 곧 여디·전체로 확대될 예정이에요. 그때 함께해요! 🙏</div></div>`;
+  } else if(today===null){
+    html+=`<div class="g-card"><div class="g-card-title">📅 오늘은 정원 모임이 없어요</div><div class="g-card-sub" style="margin-bottom:0">정원 기도회는 매주 <b>월~목 밤 10시</b>에 모입니다. 가장 가까운 모임에서 만나요.</div></div>`;
+  } else if(myPart){
+    html+=`<div class="g-card"><div class="g-done"><div class="g-done-t">✅ 오늘 정원 참여 완료!</div><div style="color:var(--txtM);font-size:12px">${gardenDateLabel(today)} · 함께해주셔서 감사합니다</div></div>${myPart.prayer?`<div class="g-leader" style="margin-top:12px"><b>나의 기도제목</b><br><span style="white-space:pre-wrap">${esc(myPart.prayer)}</span></div>`:''}</div>`;
+  } else {
+    html+=`<div class="g-card">
+      <div class="g-card-title">🙏 오늘 정원 참여</div>
+      <div class="g-card-sub">${gardenDateLabel(today)} 밤 10시 모임</div>
+      ${leader?`<div class="g-leader">오늘의 인도자 · <b>${esc(leader)}</b></div>`:''}
+      <textarea id="gardenPrayer" class="g-prayer" placeholder="함께 나눌 기도제목이 있다면 적어주세요 (선택)"></textarea>
+      <button class="btn btn-pri" style="margin-top:12px" onclick="doGardenCheckin()">참여 체크 ✅</button>
+    </div>`;
+  }
+
+  if(recent.length){
+    html+=`<div class="g-card"><div class="g-card-title">🌱 나의 최근 참여 <span style="color:var(--txtD);font-size:11px;font-weight:400">· ${recent.length}회</span></div><div class="g-recent">${recent.map(r=>`<span class="g-chip">${gardenChipLabel(r.meet_date)}</span>`).join('')}</div></div>`;
+  }
+
+  html+=`<div class="g-card"><div class="notif-row">
+      <div class="nt-txt"><div class="t">🔔 기도회 알림</div><div class="s">밤 9시 55분, 시작 5분 전 알림을 받아요.<br>먼저 홈 화면에 추가 후 켜주세요.</div></div>
+      <button class="nt-btn off" id="notifBtn" onclick="toggleNotif()">알림 켜기</button>
+    </div></div>`;
+
+  return html;
+}
+
+async function doGardenCheckin(){
+  const today=gardenTodayDate();
+  if(today===null){ showToast('오늘은 정원 모임이 없습니다','bad'); return; }
+  const ta=document.getElementById('gardenPrayer');
+  const prayer=ta?ta.value.trim():'';
+  const{error}=await sb.from('gd_participation').insert({user_id:curUser.id,meet_date:today,prayer});
+  if(error){ if(error.code==='23505')showToast('오늘은 이미 참여 체크했어요','bad'); else showToast('오류: '+error.message,'bad'); return; }
+  showToast('정원 참여 완료! 🌿'); renderUserDash();
+}
+
+// ═══════════ PWA / 웹푸시 알림 ═══════════
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone=window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+let swReg=null;
+async function registerSW(){
+  if(!('serviceWorker' in navigator))return null;
+  try{ swReg=await navigator.serviceWorker.register('/sw.js'); return swReg; }catch(e){ return null; }
+}
+function urlB64ToUint8(b64){
+  const pad='='.repeat((4-b64.length%4)%4);
+  const s=(b64+pad).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(s); const a=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i);
+  return a;
+}
+async function currentSub(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return null;
+  try{ const r=swReg||await navigator.serviceWorker.ready; return await r.pushManager.getSubscription(); }catch(e){ return null; }
+}
+async function refreshNotifBtn(){
+  const btn=document.getElementById('notifBtn'); if(!btn)return;
+  if(isIOS&&!isStandalone){ btn.className='nt-btn off'; btn.textContent='홈 화면에 추가'; return; }
+  const sub=await currentSub();
+  if(sub&&Notification.permission==='granted'){ btn.className='nt-btn on'; btn.textContent='알림 켜짐'; }
+  else{ btn.className='nt-btn off'; btn.textContent='알림 켜기'; }
+}
+async function toggleNotif(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){ showToast('이 브라우저는 알림을 지원하지 않습니다','bad'); return; }
+  if(isIOS&&!isStandalone){ showToast('아이폰은 먼저 홈 화면에 추가한 뒤 알림을 켤 수 있어요','bad'); return; }
+  const existing=await currentSub();
+  if(existing&&Notification.permission==='granted'){
+    try{ await existing.unsubscribe(); await sb.from('gd_push_subs').delete().eq('endpoint',existing.endpoint); }catch(e){}
+    showToast('알림을 껐습니다'); refreshNotifBtn(); return;
+  }
+  let perm=Notification.permission;
+  if(perm!=='granted') perm=await Notification.requestPermission();
+  if(perm!=='granted'){ showToast('알림 권한이 허용되지 않았습니다','bad'); return; }
+  const reg=swReg||await navigator.serviceWorker.ready;
+  let sub;
+  try{ sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8(VAPID_PUBLIC)}); }
+  catch(e){ showToast('알림 등록 실패: '+e.message,'bad'); return; }
+  const j=sub.toJSON();
+  const{error}=await sb.from('gd_push_subs').upsert({
+    endpoint:sub.endpoint, p256dh:j.keys.p256dh, auth:j.keys.auth,
+    user_id:curUser?curUser.id:null, mokjang:curUser?curUser.mokjang:null
+  },{onConflict:'endpoint'});
+  if(error){ showToast('알림 저장 실패(테이블 확인 필요)','bad'); return; }
+  showToast('알림을 켰습니다 🔔'); refreshNotifBtn();
 }
 
 // ═══════════ 관리자 ═══════════
@@ -657,6 +893,9 @@ async function execChangeMok(){
   if(curUser&&curUser.id===changeMokId){curUser.mokjang=nv;renderUserDash()}
   showToast("목장이 "+nv+"(으)로 변경되었습니다");closeModal("changeMokModal");renderAdmin();
 }
+
+// ═══════════ 초기화 ═══════════
+registerSW();
 </script>
 </body>
 </html>
