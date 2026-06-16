@@ -416,6 +416,20 @@ optgroup{font-weight:700;color:var(--priL)}
   </div>
 </div>
 
+<!-- 모달: 알림 소리·진동 설정 안내 -->
+<div id="notifHelpModal" class="overlay" onclick="closeModal('notifHelpModal')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:82vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <h3>🔔 소리·진동이 안 울릴 때</h3>
+      <button style="background:var(--sfL);border:none;border-radius:8px;width:32px;height:32px;color:var(--txtM);font-size:16px" onclick="closeModal('notifHelpModal')">✕</button>
+    </div>
+    <p class="desc" style="margin-bottom:14px">알림은 도착하는데 소리·진동만 없다면 폰의 <b>앱 알림 설정</b> 때문이에요. 웹앱이라 이 화면을 자동으로 열어드릴 수 없어, 아래 위치로 직접 가서 켜주세요.</p>
+    <div class="g-leader" style="margin-bottom:10px"><b style="color:var(--priL)">🍎 아이폰</b><br>설정 → 알림 → <b>정원X여기갑세</b> → ‘소리’와 ‘햅틱(진동)’ 켜기.<br>측면 무음 스위치·집중 모드(방해금지)도 확인하세요.</div>
+    <div class="g-leader" style="margin-bottom:10px"><b style="color:var(--priL)">🤖 안드로이드</b><br>설정 → 앱 → <b>정원X여기갑세</b> → 알림 → 해당 알림의 <b>소리·진동 켜기</b>(또는 중요도 ‘높음’).<br>무음·방해금지 모드도 확인하세요.</div>
+    <div class="g-notice" style="font-size:12px">💡 벨소리 모드면 소리, 무음 모드면 진동만 — 카톡 알림과 동일한 방식입니다.</div>
+  </div>
+</div>
+
 <script>
 // ═══════════ Supabase 초기화 ═══════════
 const SB_URL = 'https://tdpddanudkjhylcfyepk.supabase.co';
@@ -735,7 +749,9 @@ async function gardenTabHTML(){
   html+=`<div class="g-card"><div class="notif-row">
       <div class="nt-txt"><div class="t">🔔 기도회 알림</div><div class="s">밤 9시 55분, 시작 5분 전 알림을 받아요.<br>먼저 홈 화면에 추가 후 켜주세요.</div></div>
       <button class="nt-btn off" id="notifBtn" onclick="toggleNotif()">알림 켜기</button>
-    </div></div>`;
+    </div>
+    <a class="g-guide-link" style="margin-top:14px;font-size:11.5px;display:block;text-align:left" onclick="openModal('notifHelpModal')">🔕 알림은 오는데 소리·진동이 없나요? 설정 방법 보기 →</a>
+    </div>`;
 
   return html;
 }
@@ -794,6 +810,7 @@ async function toggleNotif(){
     showToast('알림을 껐습니다'); refreshNotifBtn(); return;
   }
   let perm=Notification.permission;
+  if(perm==='denied'){ openModal('notifHelpModal'); return; }
   if(perm!=='granted') perm=await Notification.requestPermission();
   if(perm!=='granted'){ showToast('알림 권한이 허용되지 않았습니다','bad'); return; }
   const reg=swReg||await navigator.serviceWorker.ready;
