@@ -9,7 +9,7 @@
 <title>정원 × 여기갑세</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
-<meta name="apple-mobile-web-app-title" content="정원">
+<meta name="apple-mobile-web-app-title" content="정원X여기갑세">
 <meta property="og:title" content="정원 × 여기갑세 🌿">
 <meta property="og:description" content="정원 온라인기도회 · 여디디야 금요기도회">
 <meta property="og:image" content="https://yeogigapse.vercel.app/og-image.png">
@@ -214,6 +214,8 @@ optgroup{font-weight:700;color:var(--priL)}
 .g-done{background:var(--okD);border:1px solid rgba(74,222,128,.3);border-radius:12px;padding:16px;text-align:center}
 .g-done-t{color:var(--ok);font-weight:700;font-size:15px;margin-bottom:4px}
 .g-notice{background:var(--accD);border:1px solid rgba(255,184,77,.3);border-radius:12px;padding:14px 16px;color:var(--acc);font-size:13px;line-height:1.6}
+.g-mute{background:var(--accD);border:1px solid var(--acc);border-radius:10px;padding:10px 12px;text-align:center;color:var(--acc);font-size:12.5px;font-weight:600;line-height:1.5}
+.g-mute b{color:var(--acc);text-decoration:underline}
 .g-recent{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .g-chip{background:var(--priD);color:var(--priL);font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px}
 .notif-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -305,8 +307,10 @@ optgroup{font-weight:700;color:var(--priL)}
       <p class="g-flow">하나님의 사랑하시는 자, 여디디야가 함께 기도하며 자라는 정원입니다.<br>성경봉독 → 찬양 → 기도 순서로, 짧지만 깊게 모입니다.</p>
     </div>
 
+    <div class="g-mute">🔇 정원은 <b>마이크를 끄고(음소거)</b> 입장하는 것이 기본 약속이에요</div>
+
     <div class="guide-sec-title">참여하는 법</div>
-    <div class="guide-step"><div class="gs-num">1</div><div><div class="gs-t">밤 9시 55분, 앱을 열어요</div><div class="gs-d">정원 탭의 <b>“정원 입장”</b> 버튼을 누르면 구글미트로 바로 연결됩니다. 인도자는 미리 들어와 준비합니다.</div></div></div>
+    <div class="guide-step"><div class="gs-num">1</div><div><div class="gs-t">밤 9시 55분, 앱을 열어요</div><div class="gs-d">정원 탭의 <b>“정원 입장”</b> 버튼을 누르면 구글미트로 바로 연결됩니다. 입장 화면(그린룸)에서 <b>마이크를 꼭 끄고(음소거)</b> 들어와 주세요 🔇 — 다 같이 조용히 시작합니다. 인도자는 미리 들어와 준비합니다.</div></div></div>
     <div class="guide-step"><div class="gs-num">2</div><div><div class="gs-t">함께 기도해요 (10:00~10:20)</div><div class="gs-d">성경봉독으로 문을 열고, 찬양을 들으며 마음을 모으고, 함께 기도합니다. 20분, 부담 없이 깊게.</div></div></div>
     <div class="guide-step"><div class="gs-num">3</div><div><div class="gs-t">참여 체크 & 기도제목</div><div class="gs-d">정원 탭에서 <b>참여 체크</b> 한 번이면 기록됩니다. 나누고 싶은 기도제목이 있으면 함께 적어주세요(선택).</div></div></div>
 
@@ -385,6 +389,31 @@ optgroup{font-weight:700;color:var(--priL)}
 <!-- 모달: 소감문 상세 -->
 <div id="noteModal" class="overlay" onclick="closeModal('noteModal')">
   <div class="modal note-modal" onclick="event.stopPropagation()" id="noteModalContent"></div>
+</div>
+
+<!-- 모달: 정원 입장 전 음소거 안내 -->
+<div id="gardenMuteModal" class="overlay" onclick="closeModal('gardenMuteModal')">
+  <div class="modal center" onclick="event.stopPropagation()">
+    <div style="font-size:42px;margin-bottom:8px">🔇</div>
+    <h3>마이크를 끄고 입장해 주세요</h3>
+    <p class="desc" style="margin-bottom:0">입장 화면(그린룸)에서 <b style="color:var(--priL);text-decoration:underline">마이크를 OFF</b> 한 뒤<br>‘참여하기’를 눌러주세요.<br>다 같이 조용히 기도로 시작합니다 🙏</p>
+    <div class="modal-actions" style="margin-top:20px">
+      <button class="btn-cancel" onclick="closeModal('gardenMuteModal')">취소</button>
+      <button style="background:var(--pri);color:#fff" onclick="openGardenMeet()">음소거 확인, 입장 🌿</button>
+    </div>
+  </div>
+</div>
+
+<!-- 모달: 정원 참여 취소 확인 -->
+<div id="gardenCancelModal" class="overlay" onclick="closeModal('gardenCancelModal')">
+  <div class="modal center" onclick="event.stopPropagation()">
+    <h3>참여 취소</h3>
+    <p class="desc">오늘 정원 참여 기록을 취소할까요?<br>작성한 기도제목도 함께 삭제됩니다.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('gardenCancelModal')">아니요</button>
+      <button style="background:var(--err);color:#fff" onclick="execGardenCancel()">참여 취소</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -650,7 +679,9 @@ async function loadGardenCfg(){
   try{ const{data}=await sb.from('gd_config').select('key,value'); const o={}; (data||[]).forEach(r=>o[r.key]=r.value); return o; }
   catch(e){ return {}; }
 }
-function enterGarden(){
+function enterGarden(){ openModal('gardenMuteModal'); }
+function openGardenMeet(){
+  closeModal('gardenMuteModal');
   const meet=(gardenCfg&&gardenCfg.meet_link)?gardenCfg.meet_link:GARDEN_MEET_DEFAULT;
   window.open(meet,'_blank','noopener');
 }
@@ -677,6 +708,7 @@ async function gardenTabHTML(){
     <span class="g-time">매주 월~목 · 밤 10:00~10:20</span>
     <p class="g-flow">성경봉독 → 찬양 → 기도. 짧지만 깊게,<br>함께 기도하며 자라는 정원입니다.</p>
     <button class="g-enter" onclick="enterGarden()">🌿 정원 입장</button>
+    <div class="g-mute" style="margin-top:12px">🔇 입장 화면에서 <b>마이크를 끄고(음소거)</b> 들어와 주세요</div>
     <a class="g-guide-link" onclick="showPage('gardenGuidePage')">참여 방법 자세히 보기 →</a>
   </div>`;
 
@@ -685,7 +717,7 @@ async function gardenTabHTML(){
   } else if(today===null){
     html+=`<div class="g-card"><div class="g-card-title">📅 오늘은 정원 모임이 없어요</div><div class="g-card-sub" style="margin-bottom:0">정원 기도회는 매주 <b>월~목 밤 10시</b>에 모입니다. 가장 가까운 모임에서 만나요.</div></div>`;
   } else if(myPart){
-    html+=`<div class="g-card"><div class="g-done"><div class="g-done-t">✅ 오늘 정원 참여 완료!</div><div style="color:var(--txtM);font-size:12px">${gardenDateLabel(today)} · 함께해주셔서 감사합니다</div></div>${myPart.prayer?`<div class="g-leader" style="margin-top:12px"><b>나의 기도제목</b><br><span style="white-space:pre-wrap">${esc(myPart.prayer)}</span></div>`:''}</div>`;
+    html+=`<div class="g-card"><div class="g-done"><div class="g-done-t">✅ 오늘 정원 참여 완료!</div><div style="color:var(--txtM);font-size:12px">${gardenDateLabel(today)} · 함께해주셔서 감사합니다</div></div>${myPart.prayer?`<div class="g-leader" style="margin-top:12px"><b>나의 기도제목</b><br><span style="white-space:pre-wrap">${esc(myPart.prayer)}</span></div>`:''}<div style="text-align:center;margin-top:14px"><button class="btn btn-ghost" style="width:auto;padding:8px 18px;font-size:12px" onclick="openModal('gardenCancelModal')">참여 취소</button></div></div>`;
   } else {
     html+=`<div class="g-card">
       <div class="g-card-title">🙏 오늘 정원 참여</div>
@@ -716,6 +748,15 @@ async function doGardenCheckin(){
   const{error}=await sb.from('gd_participation').insert({user_id:curUser.id,meet_date:today,prayer});
   if(error){ if(error.code==='23505')showToast('오늘은 이미 참여 체크했어요','bad'); else showToast('오류: '+error.message,'bad'); return; }
   showToast('정원 참여 완료! 🌿'); renderUserDash();
+}
+
+async function execGardenCancel(){
+  const today=gardenTodayDate();
+  if(today===null){ closeModal('gardenCancelModal'); return; }
+  const{error}=await sb.from('gd_participation').delete().eq('user_id',curUser.id).eq('meet_date',today);
+  closeModal('gardenCancelModal');
+  if(error){ showToast('취소 중 오류: '+error.message,'bad'); return; }
+  showToast('참여를 취소했어요'); renderUserDash();
 }
 
 // ═══════════ PWA / 웹푸시 알림 ═══════════
