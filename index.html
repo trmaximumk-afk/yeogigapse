@@ -166,6 +166,10 @@ optgroup{font-weight:700;color:var(--priL)}
 .note-modal{max-height:80vh;overflow-y:auto}
 .note-modal .note-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .note-modal .note-body{background:var(--sfL);border-radius:12px;padding:16px;line-height:1.7;font-size:14px;white-space:pre-wrap}
+.nm-head{white-space:pre-wrap}
+.nm-mosaic{display:inline;filter:blur(2.5px);-webkit-filter:blur(2.5px);color:var(--txtM);letter-spacing:1px;word-break:break-all;user-select:none;-webkit-user-select:none;pointer-events:none;margin-left:2px}
+.nm-lock{margin-top:10px;font-size:11px;color:var(--txtD);display:flex;align-items:center;gap:5px}
+.nm-notice{background:var(--adminD);border:1px solid rgba(244,114,182,.25);border-radius:10px;padding:9px 12px;color:var(--admin);font-size:11.5px;font-weight:600;margin-bottom:12px;line-height:1.45}
 .note-modal .note-meta{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .a-note-row{background:var(--sf);border-radius:12px;padding:14px 16px;border:1px solid var(--bd);margin-bottom:8px;cursor:pointer;transition:border-color .2s}
 .a-note-row:hover{border-color:var(--pri)}
@@ -464,7 +468,7 @@ let selFri=LATEST_FRIDAY, selFriIdx=0;
 function navFriday(dir){
   const ni=selFriIdx-dir;
   if(ni<0||ni>=FRIDAYS.length)return;
-  selFriIdx=ni; selFri=FRIDAYS[selFriIdx];
+  selFriIdx=ni; selFri=FRIDAYS[selFriIdx]; editAttId=null;
   if(curUser) renderUserDash();
   if(document.getElementById('adminDash').classList.contains('active')) renderAdmin();
 }
@@ -481,7 +485,7 @@ function friNavHTML(){
 let curUser=null, adminTab="attend", adminSearch="", adminType="offline";
 let cfId=null, cfType="offline", resetId=null, changeMokId=null;
 let regType="offline", userCheckType="offline";
-let userTab="attend", gardenCfg=null;
+let userTab="attend", gardenCfg=null, editAttId=null;
 let toastTimer=null;
 
 // ═══════════ 헬퍼 ═══════════
@@ -489,6 +493,18 @@ const fmtS=d=>{const[,m,day]=d.split("-");return+m+"/"+( +day)};
 const fmtF=d=>{const[y,m,day]=d.split("-");return y+"년 "+( +m)+"월 "+( +day)+"일"};
 const badge=t=>`<span class="badge badge-${t==="online"?"on":"off"}">${t==="online"?"📡 온라인":"⛪ 현장"}</span>`;
 const esc=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+// 소감문 비공개: 작성자 본인 여부
+const isOwnNote=ownerId=>!!(curUser&&curUser.id===ownerId);
+// 첫 줄(최대 40자) 미리보기 텍스트 생성 (저장용)
+function notePreview(note){ if(!note) return ""; const nl=note.indexOf("\n"); let cut=nl>=0?nl:note.length; if(cut>40)cut=40; return note.slice(0,cut); }
+// 운영진/타인용 표시: 첫 줄만 노출 + 나머지는 모자이크 (원문은 전달되지 않음)
+function maskedNoteHTML(preview,len){
+  const head=esc(preview||"");
+  const hidden=Math.max(0,(len||0)-(preview||"").length);
+  let h=`<span class="nm-head">${head||'<span style="color:var(--txtD)">(내용 없음)</span>'}</span>`;
+  if(hidden>0){ const blocks="▒".repeat(Math.min(hidden,48)); h+=`<span class="nm-mosaic">${blocks}</span>`; }
+  return h;
+}
 
 function showToast(msg,type="ok"){const el=document.getElementById("toast");el.textContent=msg;el.className="toast "+type+" show";clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2500)}
 
@@ -577,7 +593,7 @@ async function renderUserDash(){
   document.getElementById("uDashWrap").innerHTML=html;
   if(userTab==='garden') refreshNotifBtn();
 }
-function switchUserTab(t){ userTab=t; renderUserDash(); }
+function switchUserTab(t){ userTab=t; editAttId=null; renderUserDash(); }
 
 async function attendTabHTML(){
   const u=curUser;
@@ -592,11 +608,29 @@ async function attendTabHTML(){
   let html=friNavHTML();
 
   if(tr){
-    html+=`<div class="checkin-card done">
-      <div class="checkin-title">✅ ${isThisWeek?"이번주":"해당 주"} 출석 완료!</div>
-      <div class="checkin-sub">${fmtF(selFri)} · ${tr.attend_type==="online"?"📡 온라인":"⛪ 현장"} 참석</div>
-      ${tr.note?`<div class="done-note"><div class="done-note-label">📝 나의 소감문</div><p>${esc(tr.note)}</p></div>`:""}
-    </div>`;
+    if(editAttId===tr.id){
+      html+=`<div class="checkin-card pending">
+        <div class="checkin-title">✏️ 출석·소감 수정</div>
+        <div class="checkin-sub">${fmtF(selFri)} · 참석 유형과 소감문을 수정할 수 있어요</div>
+        <div class="checkin-type-row">
+          <button class="ct-btn ${userCheckType==="offline"?"sel-off":""}" onclick="setUserCheckType('offline')">⛪ 현장 참석</button>
+          <button class="ct-btn ${userCheckType==="online"?"sel-on":""}" onclick="setUserCheckType('online')">📡 온라인 참석</button>
+        </div>
+        <textarea id="userNote" class="checkin-textarea" oninput="document.getElementById('userNoteCnt').textContent=this.value.length">${esc(tr.note||"")}</textarea>
+        <div class="char-count"><span id="userNoteCnt">${(tr.note||"").length}</span>자</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" style="width:auto;flex:0 0 auto;padding:0 18px;margin-top:0" onclick="cancelEditAtt()">취소</button>
+          <button class="btn btn-pri checkin-btn" style="flex:1;margin-top:0" onclick="doUserEdit()">수정 완료 ✅</button>
+        </div>
+      </div>`;
+    } else {
+      html+=`<div class="checkin-card done">
+        <div class="checkin-title">✅ ${isThisWeek?"이번주":"해당 주"} 출석 완료!</div>
+        <div class="checkin-sub">${fmtF(selFri)} · ${tr.attend_type==="online"?"📡 온라인":"⛪ 현장"} 참석</div>
+        ${tr.note?`<div class="done-note"><div class="done-note-label">📝 나의 소감문</div><p>${esc(tr.note)}</p></div>`:""}
+        <button class="btn btn-ghost" style="margin-top:12px;font-size:13px" onclick="startEditAtt(${tr.id},'${tr.attend_type}')">✏️ 출석·소감 수정</button>
+      </div>`;
+    }
   } else {
     html+=`<div class="checkin-card pending">
       <div class="checkin-title">📌 ${isThisWeek?"이번주 출석체크":"지난 출석 등록"}</div>
@@ -649,9 +683,22 @@ async function doUserCheckin(){
   const ta=document.getElementById("userNote");
   const note=ta?ta.value.trim():"";
   if(!note||note.length<5){showToast("설교 소감문을 5자 이상 작성해주세요","bad");return}
-  const{error}=await sb.from('fp_attendance').insert({user_id:curUser.id,friday_date:selFri,attend_type:userCheckType,note});
+  const{error}=await sb.from('fp_attendance').insert({user_id:curUser.id,friday_date:selFri,attend_type:userCheckType,note,note_preview:notePreview(note),note_len:note.length});
   if(error){if(error.code==='23505')showToast("이미 해당 주 출석이 등록되어 있습니다","bad");else showToast("오류: "+error.message,"bad");return}
   showToast(`${userCheckType==="online"?"온라인":"현장"} 출석 완료! ✅`);
+  renderUserDash();
+}
+
+function startEditAtt(id,type){ editAttId=id; userCheckType=type; renderUserDash(); }
+function cancelEditAtt(){ editAttId=null; renderUserDash(); }
+async function doUserEdit(){
+  const ta=document.getElementById("userNote");
+  const note=ta?ta.value.trim():"";
+  if(!note||note.length<5){showToast("설교 소감문을 5자 이상 작성해주세요","bad");return}
+  const{error}=await sb.from('fp_attendance').update({attend_type:userCheckType,note,note_preview:notePreview(note),note_len:note.length}).eq('id',editAttId).eq('user_id',curUser.id);
+  if(error){showToast("오류: "+error.message,"bad");return}
+  editAttId=null;
+  showToast("수정되었습니다 ✅");
   renderUserDash();
 }
 
@@ -666,11 +713,16 @@ async function openNoteById(attId){
   const{data}=await sb.from('fp_attendance').select('*, fp_users(name,mokjang)').eq('id',attId).single();
   if(!data)return;
   const u=data.fp_users||curUser;
+  const own=isOwnNote(data.user_id);
+  let bodyHTML;
+  if(!data.note_preview && !data.note){ bodyHTML='<span style="color:var(--txtD);font-style:italic">소감문이 없습니다 (관리자 체크)</span>'; }
+  else if(own){ bodyHTML=esc(data.note); }
+  else { bodyHTML=maskedNoteHTML(data.note_preview,data.note_len)+'<div class="nm-lock">🔒 나머지 내용은 작성자 본인만 볼 수 있어요</div>'; }
   document.getElementById("noteModalContent").innerHTML=`
     <div class="note-header"><h3>📝 설교 소감문</h3><button style="background:var(--sfL);border:none;border-radius:8px;width:32px;height:32px;color:var(--txtM);font-size:16px;cursor:pointer" onclick="closeModal('noteModal')">✕</button></div>
     <div class="note-meta"><span style="color:var(--txt);font-size:14px;font-weight:600">${esc(u.name)}</span>${badge(data.attend_type)}</div>
     <p style="color:var(--txtM);font-size:12px;margin-bottom:12px">${fmtF(data.friday_date)} · ${u.mokjang} 목장</p>
-    <div class="note-body">${data.note?esc(data.note):'<span style="color:var(--txtD);font-style:italic">소감문이 없습니다 (관리자 체크)</span>'}</div>`;
+    <div class="note-body">${bodyHTML}</div>`;
   openModal("noteModal");
 }
 
@@ -838,8 +890,8 @@ function switchAdminTab(k){adminTab=k;renderAdmin()}
 async function renderAdmin(){
   const isThisWeek=selFriIdx===0;
   const{data:allUsers}=await sb.from('fp_users').select('*').order('created_at',{ascending:true});
-  const{data:selAtt}=await sb.from('fp_attendance').select('*').eq('friday_date',selFri);
-  const{data:allAtt}=await sb.from('fp_attendance').select('*');
+  const{data:selAtt}=await sb.from('fp_attendance').select('id,user_id,friday_date,attend_type,note_preview,note_len,created_at').eq('friday_date',selFri);
+  const{data:allAtt}=await sb.from('fp_attendance').select('id,user_id,friday_date,attend_type,note_len,created_at');
   const users=allUsers||[], att=selAtt||[], allA=allAtt||[];
 
   const cntMap={};allA.forEach(a=>{cntMap[a.user_id]=(cntMap[a.user_id]||0)+1});
@@ -879,22 +931,23 @@ async function renderAdmin(){
       html+=`<div class="a-card" style="${tr?'opacity:.7;border-color:rgba(74,222,128,.25)':''}">
         <div class="a-left">
           <div class="a-icon" style="background:${tr?'var(--okD)':'var(--priD)'}">${tr?"✅":"🙏"}</div>
-          <div><div class="a-name">${esc(u.name)} ${tr?badge(tr.attend_type):""} ${tr&&tr.note?'<span class="h-note-icon" style="font-size:10px">📝</span>':""}</div>
+          <div><div class="a-name">${esc(u.name)} ${tr?badge(tr.attend_type):""} ${tr&&tr.note_preview?'<span class="h-note-icon" style="font-size:10px">📝</span>':""}</div>
           <div class="a-sub">${u.mokjang} · ${n}회</div></div>
         </div>
         <button class="btn-sm" style="background:${tr?'var(--okD)':'var(--pri)'};color:${tr?'var(--ok)':'#fff'}" ${tr?"disabled":""} onclick="${tr?"":"openAdminConfirm("+u.id+",'"+esc(u.name)+"')"}">${tr?"완료":"출석"}</button>
       </div>`;
     });
   } else if(adminTab==="notes"){
-    const notes=att.filter(a=>a.note);
+    const notes=att.filter(a=>a.note_preview);
     const userMap={};users.forEach(u=>{userMap[u.id]=u});
+    html+=`<div class="nm-notice">🔒 소감문은 작성자 본인만 전체를 볼 수 있어요. 운영진 화면에는 첫 줄만 표시되고 나머지는 모자이크 처리됩니다.</div>`;
     html+=`<p style="color:var(--txtM);font-size:13px;margin-bottom:12px">📝 ${isThisWeek?"이번주":"해당 주"} 소감문 ${notes.length}건</p>`;
     if(!notes.length) html+=`<p style="color:var(--txtD);font-size:13px;text-align:center;padding:30px 0">작성된 소감문이 없습니다</p>`;
     else notes.forEach(a=>{
       const u=userMap[a.user_id]||{name:"?",mokjang:"?"};
-      html+=`<div class="a-note-row" onclick="openNoteById(${a.id})">
+      html+=`<div class="a-note-row" style="cursor:default">
         <div class="a-note-top"><span class="a-note-name">${esc(u.name)} <span style="color:var(--txtM);font-size:11px;font-weight:400">${u.mokjang}</span></span>${badge(a.attend_type)}</div>
-        <div class="a-note-preview">${esc(a.note)}</div>
+        <div class="a-note-preview">${maskedNoteHTML(a.note_preview,a.note_len)}</div>
       </div>`;
     });
   } else {
@@ -930,7 +983,7 @@ function setCfType(t){cfType=t;document.getElementById("cfOff").className="type-
 
 async function execAdminCheck(){
   if(!cfId)return;
-  const{error}=await sb.from('fp_attendance').insert({user_id:cfId,friday_date:selFri,attend_type:cfType,note:""});
+  const{error}=await sb.from('fp_attendance').insert({user_id:cfId,friday_date:selFri,attend_type:cfType,note:"",note_preview:"",note_len:0});
   if(error){showToast("오류: "+error.message,"bad");closeModal("confirmModal");return}
   showToast("출석 완료! ✅");
   closeModal("confirmModal"); renderAdmin();
