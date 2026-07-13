@@ -207,6 +207,8 @@ optgroup{font-weight:700;color:var(--priL)}
 .g-hero .g-flow{color:var(--txtM);font-size:12px;line-height:1.6;margin-bottom:16px}
 .g-enter{width:100%;border:none;border-radius:12px;padding:15px 0;font-size:16px;font-weight:700;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
 .g-enter:active{opacity:.85}
+.g-copy{width:100%;border:1px solid var(--pri);border-radius:12px;padding:12px 0;font-size:13.5px;font-weight:700;background:rgba(108,99,255,.12);color:var(--priL);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;transition:opacity .15s;cursor:pointer}
+.g-copy:active{opacity:.8}
 .g-guide-link{display:block;text-align:center;margin-top:12px;color:var(--priL);font-size:12px;font-weight:600;text-decoration:none;cursor:pointer}
 .g-card{background:var(--sf);border-radius:16px;padding:20px;border:1px solid var(--bd);margin-bottom:16px}
 .g-card-title{font-size:14px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px}
@@ -746,6 +748,26 @@ async function loadGardenCfg(){
   catch(e){ return {}; }
 }
 function enterGarden(){ openModal('gardenMuteModal'); }
+
+// 정원 미트 링크 복사 (컴퓨터·다른 기기 접속용)
+async function copyGardenLink(){
+  const meet=(gardenCfg&&gardenCfg.meet_link)?gardenCfg.meet_link:GARDEN_MEET_DEFAULT;
+  let ok=false;
+  try{
+    if(navigator.clipboard&&window.isSecureContext){ await navigator.clipboard.writeText(meet); ok=true; }
+  }catch(_){}
+  if(!ok){
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=meet; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      ok=document.execCommand('copy');
+      document.body.removeChild(ta);
+    }catch(_){}
+  }
+  if(ok){ showToast('정원 링크가 복사되었습니다 💻 컴퓨터 주소창에 붙여넣으세요'); }
+  else{ window.prompt('아래 링크를 길게 눌러 복사하세요', meet); }
+}
 function openGardenMeet(){
   closeModal('gardenMuteModal');
   const meet=(gardenCfg&&gardenCfg.meet_link)?gardenCfg.meet_link:GARDEN_MEET_DEFAULT;
@@ -774,6 +796,7 @@ async function gardenTabHTML(){
     <span class="g-time">매주 월~목 · 밤 10:00~10:20</span>
     <p class="g-flow">성경봉독 → 찬양 → 기도. 짧지만 깊게,<br>함께 기도하며 자라는 정원입니다.</p>
     <button class="g-enter" onclick="enterGarden()">🌿 정원 입장</button>
+    <button class="g-copy" onclick="copyGardenLink()">💻 컴퓨터로 참여 · 링크 복사</button>
     <div class="g-mute" style="margin-top:12px">🔇 입장 화면에서 <b>마이크를 끄고(음소거)</b> 들어와 주세요</div>
     <a class="g-guide-link" onclick="showPage('gardenGuidePage')">참여 방법 자세히 보기 →</a>
   </div>`;
