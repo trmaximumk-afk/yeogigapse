@@ -458,7 +458,7 @@ function getRecentFridays(count=12){
   if(day!==5){ const diff=day>=5?day-5:day+2; thisFri.setDate(d.getDate()-diff); }
   for(let i=0;i<count;i++){
     const f=new Date(thisFri); f.setDate(thisFri.getDate()-i*7);
-    const ds=f.toISOString().split('T')[0];
+    const ds=`${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}-${String(f.getDate()).padStart(2,'0')}`;
     if(ds>=FIRST_FRIDAY) fridays.push(ds);
   }
   return fridays.length?fridays:[FIRST_FRIDAY];
