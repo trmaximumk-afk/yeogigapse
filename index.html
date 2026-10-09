@@ -6,6 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0C0F1A">
+<!-- 앱 버전: 배포할 때마다 올릴 것 (열려 있던 옛 화면에 새로고침 안내가 뜸) -->
+<meta name="app-version" content="2026-10-09.1">
 <title>정원 × 여기갑세</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -77,6 +79,9 @@ optgroup{font-weight:700;color:var(--priL)}
 .toast.show{display:block;animation:slideDown .3s ease}
 .toast.ok{background:#1a3a2a;border:1px solid var(--ok);color:var(--ok)}
 .toast.bad{background:#3a1a1a;border:1px solid var(--err);color:var(--err)}
+.update-bar{position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:9998;display:none;align-items:center;gap:12px;padding:8px 8px 8px 18px;border-radius:12px;background:var(--sfL);border:1px solid var(--pri);color:var(--txt);font-size:14px;font-weight:600;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,.45)}
+.update-bar.show{display:flex;animation:slideDown .3s ease}
+.update-bar button{border:none;border-radius:8px;padding:8px 14px;background:var(--pri);color:#fff;font-size:13px;font-weight:700}
 
 .home-icon{font-size:56px;margin-bottom:12px}
 .home-title{font-size:24px;font-weight:700;margin-bottom:4px}
@@ -242,6 +247,7 @@ optgroup{font-weight:700;color:var(--priL)}
 <body>
 
 <div id="toast" class="toast ok"></div>
+<div id="updateBar" class="update-bar">새 버전이 나왔어요 <button onclick="location.reload()">새로고침</button></div>
 
 <!-- 홈 -->
 <div id="homePage" class="page active">
@@ -686,7 +692,7 @@ async function doUserCheckin(){
   const note=ta?ta.value.trim():"";
   if(!note||note.length<5){showToast("설교 소감문을 5자 이상 작성해주세요","bad");return}
   const{error}=await sb.from('fp_attendance').insert({user_id:curUser.id,friday_date:selFri,attend_type:userCheckType,note,note_preview:notePreview(note),note_len:note.length});
-  if(error){if(error.code==='23505')showToast("이미 해당 주 출석이 등록되어 있습니다","bad");else showToast("오류: "+error.message,"bad");return}
+  if(error){if(error.code==='23505')showToast("이미 해당 주 출석이 등록되어 있습니다","bad");else if(error.code==='23514')showToast("앱을 새로고침한 뒤 다시 시도해주세요","bad");else showToast("오류: "+error.message,"bad");return}
   showToast(`${userCheckType==="online"?"온라인":"현장"} 출석 완료! ✅`);
   renderUserDash();
 }
@@ -1028,8 +1034,26 @@ async function execChangeMok(){
   showToast("목장이 "+nv+"(으)로 변경되었습니다");closeModal("changeMokModal");renderAdmin();
 }
 
+// ═══════════ 새 버전 안내 ═══════════
+// 폰에서 앱을 닫지 않으면 몇 주씩 옛 코드가 그대로 돈다(알림을 눌러도 열려 있던 창으로 돌아감).
+// 화면이 다시 보일 때 서버의 app-version과 비교해 다르면 새로고침 안내. (7~8월 데이터 오류의 재발 방지)
+const APP_VERSION=document.querySelector('meta[name="app-version"]').content;
+let verCheckedAt=0;
+async function checkAppVersion(){
+  if(Date.now()-verCheckedAt<5*60*1000)return;
+  verCheckedAt=Date.now();
+  try{
+    const r=await fetch('/?v='+Date.now(),{cache:'no-store'}); if(!r.ok)return;
+    const m=new DOMParser().parseFromString(await r.text(),'text/html').querySelector('meta[name="app-version"]');
+    if(m&&m.content&&m.content!==APP_VERSION)document.getElementById("updateBar").classList.add("show");
+  }catch(e){}
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkAppVersion()});
+window.addEventListener("pageshow",e=>{if(e.persisted)checkAppVersion()});
+
 // ═══════════ 초기화 ═══════════
 registerSW();
+setTimeout(checkAppVersion,5000);
 </script>
 </body>
 </html>
