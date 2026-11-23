@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0F2442">
 <!-- 앱 버전: 배포할 때마다 올릴 것 (열려 있던 옛 화면에 새로고침 안내가 뜸) -->
-<meta name="app-version" content="2026-11-24.4">
+<meta name="app-version" content="2026-11-24.5">
 <title>정원 × 여기갑세</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -106,6 +106,7 @@ optgroup{font-weight:700;color:var(--priL)}
 #homePage .btn-ghost .home-ic{background:rgba(220,194,134,.10);box-shadow:inset 0 0 0 1px rgba(220,194,134,.40);color:var(--yd-gold-300)}
 .home-lb{flex:1}
 .home-chev{opacity:.45}
+.home-note{color:rgba(255,255,255,.62);font-size:12px;line-height:1.5;margin-top:-2px}
 /* 관리자 입장(구분선+버튼): 여디디야청년부에서 사역자·임원으로 확인된 기기에서만 보인다. 기본은 숨김 */
 #homePage .home-admin{display:none}
 #homePage.can-admin .home-admin{display:flex}
@@ -390,9 +391,10 @@ optgroup{color:var(--yd-navy-700)}
       <div class="home-sub">정원 온라인기도회 · 여디디야 금요기도회</div>
       <div class="home-actions">
         <button class="btn btn-pri" onclick="showPage('loginPage')"><span class="home-ic"><i data-yd="login" data-s="19"></i></span><span class="home-lb yd-serif">로그인</span><span class="home-chev"><i data-yd="chevright" data-s="18"></i></span></button>
-        <button class="btn btn-acc" onclick="showPage('registerPage')"><span class="home-ic"><i data-yd="userplus" data-s="19"></i></span><span class="home-lb yd-serif">회원가입</span><span class="home-chev"><i data-yd="chevright" data-s="18"></i></span></button>
+        <button class="btn btn-acc" onclick="goJoin()"><span class="home-ic"><i data-yd="userplus" data-s="19"></i></span><span class="home-lb yd-serif">회원가입</span><span class="home-chev"><i data-yd="chevright" data-s="18"></i></span></button>
+        <p class="home-note">회원가입은 여디디야청년부 앱에서 합니다.</p>
         <div class="home-divider home-admin"><span class="yd-gold-rule"></span><b>관리자</b><span class="yd-gold-rule"></span></div>
-        <button class="btn btn-ghost home-admin" onclick="showPage('adminLoginPage')"><span class="home-ic"><i data-yd="shield" data-s="19"></i></span><span class="home-lb yd-serif">관리자 입장</span><span class="home-chev"><i data-yd="chevright" data-s="18"></i></span></button>
+        <button class="btn btn-ghost home-admin" onclick="enterAdmin()"><span class="home-ic"><i data-yd="shield" data-s="19"></i></span><span class="home-lb yd-serif">관리자 입장</span><span class="home-chev"><i data-yd="chevright" data-s="18"></i></span></button>
       </div>
     </div>
   </div>
@@ -409,33 +411,7 @@ optgroup{color:var(--yd-navy-700)}
       <div class="field"><label>비밀번호 (4자리)</label><input type="password" id="loginPw" maxlength="4" placeholder="••••" inputmode="numeric" style="letter-spacing:6px;text-align:center"></div>
       <div id="loginErr" class="err-msg">이름 또는 비밀번호가 일치하지 않습니다</div>
       <button class="btn btn-pri" onclick="doUserLogin()" style="margin-top:8px">로그인</button>
-      <div class="link-row"><span>계정이 없나요? </span><a onclick="showPage('registerPage')">회원가입</a><br><a onclick="showPage('homePage')" style="color:var(--txtD);margin-top:8px;display:inline-block">← 처음으로</a></div>
-    </div>
-  </div>
-</div>
-
-<!-- 회원가입 -->
-<div id="registerPage" class="page yd-hero">
-  <div class="back-row"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>뒤로</button></div>
-  <div class="center-wrap" style="min-height:auto;padding-top:0;padding-bottom:40px">
-    <div class="card">
-      <h2 class="yd-serif"><span class="yd-headicon navy"><i data-yd="userplus" data-s="16"></i></span>회원가입</h2>
-      <p class="sub">가입 후 매주 금요기도회 출석체크를 할 수 있습니다</p>
-      <div class="field"><label>이름 *</label><input type="text" id="regName" placeholder="홍길동"></div>
-      <div class="field"><label>목장 선택 *</label>
-        <!-- 아래 목록은 기본값. 앱이 열리면 DB 함수 yd_mokjang_list()(두빛나래 명단)의 목록으로 바꿔 채운다 -->
-        <select id="regMokjang"><option value="" disabled selected>목장을 선택하세요</option>
-          <optgroup label="여디"><option>예장연</option><option>미정</option><option>하이킹</option><option>예아</option></optgroup>
-          <optgroup label="디야"><option>디야로</option><option>형누나</option><option>빛과소금빵</option><option>에너자이저</option></optgroup>
-          <optgroup label="특별"><option>새가족</option><option>새내기</option></optgroup>
-        </select>
-        <p style="color:var(--txtM);font-size:11px;line-height:1.5;margin-top:6px"><i data-yd="info" data-s="12"></i> 두빛나래 여디디야 명단에 있는 이름이면 가입 뒤 그 명단의 목장으로 자동으로 맞춰집니다.</p>
-      </div>
-      <div class="field"><label>비밀번호 (숫자 4자리) *</label><input type="password" id="regPw" maxlength="4" placeholder="예: 1234" inputmode="numeric" style="letter-spacing:6px;text-align:center"></div>
-      <div class="field"><label>비밀번호 확인</label><input type="password" id="regPw2" maxlength="4" placeholder="비밀번호 재입력" inputmode="numeric" style="letter-spacing:6px;text-align:center"></div>
-      <div id="regErr" class="err-msg"></div>
-      <button class="btn btn-acc" onclick="doRegister()" style="margin-top:4px">가입하기</button>
-      <div class="link-row"><span>이미 계정이 있나요? </span><a onclick="showPage('loginPage')">로그인</a><br><a onclick="showPage('homePage')" style="color:var(--txtD);margin-top:8px;display:inline-block">← 처음으로</a></div>
+      <div class="link-row"><span>계정이 없나요? </span><a onclick="goJoin()">회원가입</a><br><a onclick="showPage('homePage')" style="color:var(--txtD);margin-top:8px;display:inline-block">← 처음으로</a></div>
     </div>
   </div>
 </div>
@@ -474,21 +450,7 @@ optgroup{color:var(--yd-navy-700)}
   </div>
 </div>
 
-<!-- 관리자 로그인 -->
-<div id="adminLoginPage" class="page yd-hero">
-  <div class="back-row"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>뒤로</button></div>
-  <div class="center-wrap" style="min-height:calc(100vh - 52px);min-height:calc(100dvh - 52px)">
-    <div class="card card-center" style="text-align:center">
-      <h2 class="yd-serif"><span class="yd-headicon"><i data-yd="shield" data-s="16"></i></span>관리자</h2><p class="sub">임원진 PIN을 입력하세요</p>
-      <div class="field"><input type="password" id="adminPin" maxlength="6" placeholder="••••" style="letter-spacing:8px;text-align:center;font-size:18px"></div>
-      <div id="adminErr" class="err-msg">PIN이 틀렸습니다</div>
-      <button class="btn btn-admin" onclick="doAdminLogin()">관리자 입장</button>
-      <div class="link-row"><a onclick="showPage('homePage')" style="color:var(--txtD)">← 처음으로</a></div>
-    </div>
-  </div>
-</div>
-
-<!-- 관리자 대시보드 -->
+<!-- 관리자 대시보드 (입장은 enterAdmin: 여디디야청년부에서 사역자·임원으로 확인된 기기만) -->
 <div id="adminDash" class="page"><div class="container" style="padding-bottom:40px" id="adminDashWrap"><div class="loading">불러오는 중...</div></div></div>
 
 <!-- 모달: 관리자 출석확인 -->
@@ -596,7 +558,6 @@ document.querySelectorAll('i[data-yd]').forEach(el=>{el.outerHTML=ic(el.dataset.
 const SB_URL = 'https://tdpddanudkjhylcfyepk.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkcGRkYW51ZGtqaHlsY2Z5ZXBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4NDM5NjYsImV4cCI6MjA4NTQxOTk2Nn0.Y_xHImUKUm-HcozBMJ1uJJZkf_Fc7OFkeDFsv53Dbs4';
 const sb = supabase.createClient(SB_URL, SB_KEY);
-const ADMIN_PIN = "2026";
 
 // ═══════════ 정원(온라인 기도회) 설정 ═══════════
 const GARDEN_MEET_DEFAULT='https://meet.google.com/nco-bnnm-igs';
@@ -625,10 +586,10 @@ async function loadMokList(){
     const diya=list.filter(x=>x.grp==='디야').map(x=>x.name), yedi=list.filter(x=>x.grp==='여디').map(x=>x.name);
     if(diya.length)DIYA_MOK=diya;
     if(yedi.length)YEDI_MOK=yedi;
-    fillMokSelect('regMokjang'); fillMokSelect('changeMokSelect');
+    fillMokSelect('changeMokSelect');
   }catch(e){}
 }
-// select 안의 목장 옵션을 받은 목록으로 다시 채운다(grp별 optgroup). 가입 화면의 "목장을 선택하세요"는 남긴다.
+// select 안의 목장 옵션을 받은 목록으로 다시 채운다(grp별 optgroup). 값이 빈 안내 옵션이 있으면 남긴다.
 function fillMokSelect(id){
   const sel=document.getElementById(id); if(!sel||!MOK_LIST)return;
   const cur=sel.value, ph=sel.querySelector('option[value=""]');
@@ -697,7 +658,7 @@ function friNavHTML(){
 // ═══════════ 상태 ═══════════
 let curUser=null, adminTab="attend", adminSearch="", adminType="offline";
 let cfId=null, cfType="offline", resetId=null, changeMokId=null;
-let regType="offline", userCheckType="offline";
+let userCheckType="offline";
 let userTab="attend", gardenCfg=null, editAttId=null;
 let toastTimer=null;
 
@@ -724,8 +685,11 @@ function showToast(msg,type="ok"){const el=document.getElementById("toast");el.t
 // ═══════════ 여디디야청년부 연결 (2026-11-24) ═══════════
 // 여디디야청년부 앱이 로그인한 사람을 https://yeogigapse.vercel.app/#yd=<토큰>&go=<user|admin> 으로 보낸다.
 // 토큰은 이 기기에 yd_token 으로 남기고, DB 함수 yd_portal_session(p_token)으로 그 사람의 역할을 받아 yd_roles 에 남긴다.
-// 홈의 '관리자' 구분선과 '관리자 입장' 버튼은 역할에 사역자(staff)나 임원(officer)이 있을 때만 보인다(기본은 숨김).
-// 관리자 PIN은 그대로 필요하다. 로그아웃(userLogout·adminLogout)은 토큰을 지우지 않는다.
+// 관리자 화면은 canAdmin(이 기기에 yd_token 이 있고, 역할에 사역자(staff)나 임원(officer)이 있음)일 때만 열린다. 따로 비밀번호는 없다.
+// 역할 = 마지막으로 성공한 yd_portal_session 응답. 확인을 기다리는 동안이나 네트워크 오류 때는 기억해 둔 yd_roles.
+// 홈의 '관리자' 구분선과 '관리자 입장' 버튼도 canAdmin 일 때만 보인다(기본은 숨김).
+// 로그아웃(userLogout·adminLogout)은 토큰을 지우지 않는다.
+const YD_PORTAL='https://yedidiya-youth.vercel.app/';   // 여디디야청년부 앱 주소(회원가입은 YD_PORTAL+'#join')
 const YD_TOKEN_KEY='yd_token', YD_ROLES_KEY='yd_roles';
 const ydStore={
   get(k){try{return localStorage.getItem(k)}catch(e){return null}},
@@ -733,10 +697,19 @@ const ydStore={
   del(k){try{localStorage.removeItem(k)}catch(e){}}
 };
 const ydCanAdmin=roles=>Array.isArray(roles)&&(roles.includes('staff')||roles.includes('officer'));
+// 토큰이 없으면 남아 있는 역할 기억은 무시한다
+const ydCanAdminNow=()=>!!ydStore.get(YD_TOKEN_KEY)&&ydCanAdmin(ydRoles);
 function ydCachedRoles(){
   try{const r=JSON.parse(ydStore.get(YD_ROLES_KEY)||'null');return Array.isArray(r)?r.filter(x=>typeof x==='string'):[]}catch(e){return []}
 }
 function ydShowAdminEntry(on){document.getElementById('homePage').classList.toggle('can-admin',!!on)}
+const ydAdminShowing=()=>document.getElementById('adminDash').classList.contains('active');
+// 홈의 관리자 입장 표시를 맞추고, canAdmin 이 아닌데 관리자 화면이 떠 있으면 홈으로 내보낸다(adminLogout 과 같은 정리)
+function ydApplyAdmin(){
+  const can=ydCanAdminNow();
+  ydShowAdminEntry(can);
+  if(!can&&ydAdminShowing())adminLogout();
+}
 // 주소의 #yd=…&go=… 를 읽는다(yd 가 없으면 null). 주소에서 지우는 일은 아래 History API 초기화(replaceState)가 한다.
 const ydEntry=(()=>{
   const raw=location.hash.replace(/^#/,''); if(!raw)return null;
@@ -754,9 +727,16 @@ if(ydEntry&&ydEntry.token){
   if(ydStore.get(YD_TOKEN_KEY)!==ydEntry.token)ydStore.del(YD_ROLES_KEY);
   ydStore.set(YD_TOKEN_KEY,ydEntry.token);
 }
+// 여디디야청년부에서 들어온 창인지(이 탭 안에서만, 새로고침해도 유지). 이런 창에서는 뒤로 가기가 이 앱의 홈 대신 청년부 앱으로 간다.
+if(ydEntry){try{sessionStorage.setItem('yd_from_portal','1')}catch(e){}}
+const ydFromPortal=()=>{try{return sessionStorage.getItem('yd_from_portal')==='1'}catch(e){return false}};
+// 청년부에서 들어온 창의 맨 아래 화면이 navStack 의 몇 번째인지. 처음·로그아웃 뒤 = 0(홈), 청년부 go=user/go=admin 으로 연 화면 = 1.
+// 뒤로 가기가 이 화면보다 아래로 내려가려 하면(홈이 보이게 되거나 홈에서 막히면) 청년부 앱으로 보낸다(popstate 처리).
+let ydRootIdx=0;
+const ydToPortal=()=>location.replace(YD_PORTAL);
 // 첫 화면은 지난번 확인한 역할로 바로 그린다(깜빡임 방지). 토큰이 없으면 숨김. 서버 확인이 오면 ydCheckSession 이 고친다.
 let ydRoles=ydStore.get(YD_TOKEN_KEY)?ydCachedRoles():[];
-ydShowAdminEntry(ydCanAdmin(ydRoles));
+ydShowAdminEntry(ydCanAdminNow());
 
 // 토큰 확인: ok:true → 역할 저장, ok:false → 토큰·역할 지움, 네트워크·함수 오류 → 기억해 둔 역할 그대로(null 반환)
 async function ydCheckSession(){
@@ -769,15 +749,15 @@ async function ydCheckSession(){
     if(typeof data==='string'){try{data=JSON.parse(data)}catch(_){data=null}}
   }catch(e){return null}
   if(!data||typeof data!=='object')return null;
-  if(data.ok===false){ydStore.del(YD_TOKEN_KEY);ydStore.del(YD_ROLES_KEY);ydRoles=[];ydShowAdminEntry(false);return data}
+  if(data.ok===false){ydStore.del(YD_TOKEN_KEY);ydStore.del(YD_ROLES_KEY);ydRoles=[];ydApplyAdmin();return data}
   if(data.ok!==true)return null;
   ydRoles=Array.isArray(data.roles)?data.roles.filter(x=>typeof x==='string'):[];
   ydStore.set(YD_ROLES_KEY,JSON.stringify(ydRoles));
-  ydShowAdminEntry(ydCanAdmin(ydRoles));
+  ydApplyAdmin();
   return data;
 }
 // go=user: 그 사람으로 바로 로그인(doUserLogin 성공과 같은 상태, fp_users 행을 id로 받음). 못 받으면 홈 그대로.
-// go=admin: 사역자·임원이면 관리자 PIN 화면(PIN은 그대로 입력). 아니면 홈 그대로.
+// go=admin: 서버 확인을 기다린 뒤(네트워크 오류면 기억해 둔 역할로) 사역자·임원이면 관리자 화면으로 바로. 아니면 홈 그대로.
 // 확인을 기다리는 사이 사용자가 홈에서 다른 화면으로 움직였으면 아무것도 바꾸지 않는다.
 async function ydStart(){
   const sess=await ydCheckSession();
@@ -790,8 +770,9 @@ async function ydStart(){
       const{data,error}=await sb.from('fp_users').select('*').eq('id',id);
       if(error||!data||data.length===0||curUser||navStack.length!==1)return;
       curUser=data[0]; showPage("userDash"); renderUserDash();
+      ydRootIdx=navStack.length-1;
     }catch(e){}
-  }else if(go==='admin'&&ydCanAdmin(ydRoles))showPage('adminLoginPage');
+  }else if(go==='admin'){enterAdmin(); if(ydAdminShowing())ydRootIdx=navStack.length-1;}
 }
 // 앱이 열려 있는 창에 주소의 #yd= 만 바뀌어 들어오면(같은 문서 안 이동) 새로 불러 처음 연 것처럼 처리한다
 window.addEventListener("hashchange",()=>{if(/^#(.*&)?yd=/.test(location.hash))location.reload()});
@@ -817,17 +798,19 @@ function goBack(){history.back()}
 window.addEventListener("popstate",function(){
   if(skipNextPop){skipNextPop=false;return}
   if(openModals.length>0){openModals.pop();const els=document.querySelectorAll('.overlay.show');if(els.length)els[els.length-1].classList.remove('show');return}
+  // 여디디야청년부에서 들어온 창: 맨 아래 화면에서 더 뒤로 가면 이 앱의 홈 대신 청년부 앱으로(화면은 바꾸지 않고 바로 이동)
+  if(ydFromPortal()&&navStack.length-1<=ydRootIdx){ydToPortal();return}
   if(navStack.length>1){navStack.pop();const prev=navStack[navStack.length-1];document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(prev).classList.add("active");window.scrollTo(0,0)}
   else history.pushState({guard:true},"");
 });
 // 여디디야청년부에서 #yd=…&go=… 로 왔으면 첫 기록을 바꿀 때 그 부분을 주소에서 뺀다(뒤로 가기 기록에도 토큰이 남지 않음)
 if(ydEntry)history.replaceState({page:"homePage"},"",ydEntry.url); else history.replaceState({page:"homePage"},"");
 history.pushState({guard:true},"");
+// 뒤로·앞으로 가기로 관리자 화면에 다시 왔는데 canAdmin 이 아니면 홈으로 (위 popstate 처리 다음에 돈다)
+window.addEventListener("popstate",()=>{if(ydAdminShowing()&&!ydCanAdminNow())adminLogout()});
 
 // ═══════════ 로그인 ═══════════
 document.getElementById("loginPw").addEventListener("keydown",e=>{if(e.key==="Enter")doUserLogin()});
-document.getElementById("regPw2").addEventListener("keydown",e=>{if(e.key==="Enter")doRegister()});
-document.getElementById("adminPin").addEventListener("keydown",e=>{if(e.key==="Enter")doAdminLogin()});
 
 async function doUserLogin(){
   const name=document.getElementById("loginName").value.trim();
@@ -836,32 +819,11 @@ async function doUserLogin(){
   if(error||!data||data.length===0){document.getElementById("loginErr").style.display="block";return}
   curUser=data[0]; showPage("userDash"); renderUserDash();
 }
-function userLogout(){curUser=null;navStack=["homePage"];showPage("homePage",false);history.replaceState({page:"homePage"},"");history.pushState({guard:true},"")}
+function userLogout(){curUser=null;navStack=["homePage"];ydRootIdx=0;showPage("homePage",false);history.replaceState({page:"homePage"},"");history.pushState({guard:true},"")}
 
-// ═══════════ 회원가입 ═══════════
-function setRegType(t){regType=t;document.getElementById("regTypeOff").className="ct-btn"+(t==="offline"?" sel-off":"");document.getElementById("regTypeOn").className="ct-btn"+(t==="online"?" sel-on":"")}
-
-async function doRegister(){
-  const name=document.getElementById("regName").value.trim();
-  const mok=document.getElementById("regMokjang").value;
-  const pw=document.getElementById("regPw").value;
-  const pw2=document.getElementById("regPw2").value;
-  const errEl=document.getElementById("regErr");
-  if(!name){errEl.textContent="이름을 입력하세요";errEl.style.display="block";return}
-  if(!mok){errEl.textContent="목장을 선택하세요";errEl.style.display="block";return}
-  if(!pw||pw.length!==4||!/^\d{4}$/.test(pw)){errEl.textContent="비밀번호는 숫자 4자리로 입력하세요";errEl.style.display="block";return}
-  if(pw!==pw2){errEl.textContent="비밀번호가 일치하지 않습니다";errEl.style.display="block";return}
-  errEl.style.display="none";
-
-  const{data:ud,error:ue}=await sb.from('fp_users').insert({name,mokjang:mok,pw}).select().single();
-  if(ue){
-    if(ue.code==='23505'){errEl.textContent="이미 동일한 계정이 존재합니다";errEl.style.display="block";return}
-    errEl.textContent="오류가 발생했습니다: "+ue.message;errEl.style.display="block";return;
-  }
-  curUser=ud;
-  showToast("가입 완료!");
-  showPage("userDash"); renderUserDash();
-}
+// ═══════════ 회원가입 → 여디디야청년부 앱 ═══════════
+// 회원가입은 여디디야청년부 앱에서 한다(같은 fp_users 계정을 만들고 거기서 로그인까지 함). 같은 창에서 그 가입 화면(#join)으로 보낸다.
+function goJoin(){location.href=YD_PORTAL+'#join'}
 
 // ═══════════ 유저 대시보드 ═══════════
 async function renderUserDash(){
@@ -1192,15 +1154,18 @@ async function toggleNotif(){
 }
 
 // ═══════════ 관리자 ═══════════
-function doAdminLogin(){
-  if(document.getElementById("adminPin").value===ADMIN_PIN){showPage("adminDash");renderAdmin()}
-  else{document.getElementById("adminErr").style.display="block";setTimeout(()=>document.getElementById("adminErr").style.display="none",1500)}
+// 관리자 입장: 홈의 '관리자 입장' 버튼과 여디디야청년부의 go=admin 이 부른다. canAdmin 이 아니면 아무것도 하지 않는다(홈 그대로).
+function enterAdmin(){
+  if(!ydCanAdminNow())return;
+  showPage("adminDash");renderAdmin();
 }
-function adminLogout(){navStack=["homePage"];showPage("homePage",false);history.replaceState({page:"homePage"},"");history.pushState({guard:true},"")}
+function adminLogout(){navStack=["homePage"];ydRootIdx=0;showPage("homePage",false);history.replaceState({page:"homePage"},"");history.pushState({guard:true},"")}
 
 function switchAdminTab(k){adminTab=k;renderAdmin()}
 
 async function renderAdmin(){
+  // canAdmin 이 아니면 그리지 않고, 관리자 화면이 떠 있으면 홈으로
+  if(!ydCanAdminNow()){if(ydAdminShowing())adminLogout();return}
   const isThisWeek=selFriIdx===0;
   const{data:allUsers}=await sb.from('fp_users').select('*').order('created_at',{ascending:true});
   const{data:selAtt}=await sb.from('fp_attendance').select('id,user_id,friday_date,attend_type,note_preview,note_len,created_at').eq('friday_date',selFri);
