@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0F2442">
 <!-- 앱 버전: 배포할 때마다 올릴 것 (열려 있던 옛 화면에 새로고침 안내가 뜸) -->
-<meta name="app-version" content="2026-11-24.2">
+<meta name="app-version" content="2026-11-24.3">
 <title>정원 × 여기갑세</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -653,7 +653,9 @@ function mokGrp(mok){
   return '';
 }
 // 화면 표시: "디야로 목장", 비어 있거나 미배정이면 "목장 미배정"
-const mokLabel=m=>(!m||m==='미배정')?'목장 미배정':esc(m)+' 목장';
+// 소속이 없으면(이음으로 넘어간 사람 등, 두빛나래에서 목장이 없거나 빠진 사람) 목장을 보이지 않고 이름만 남긴다
+const hasMok=m=>!!m&&m!=='미배정';
+const mokLabel=m=>hasMok(m)?esc(m)+' 목장':'';
 
 // ═══════════ 금요일 날짜 시스템 ═══════════
 const FIRST_FRIDAY='2026-05-08'; // 첫 출석 가능 금요일
@@ -789,7 +791,7 @@ async function renderUserDash(){
     <div class="dash-header yd-hd">
       <div class="dash-user">
         <img class="yd-hd-sym" src="yd/brand/church-symbol-light.svg" alt="" draggable="false">
-        <div><div class="yd-hd-title yd-serif">정원 × 여기갑세</div><div class="dash-who"><span class="dash-name">${esc(u.name)}</span> · <span class="dash-mokjang">${mokLabel(u.mokjang)}</span></div></div>
+        <div><div class="yd-hd-title yd-serif">정원 × 여기갑세</div><div class="dash-who"><span class="dash-name">${esc(u.name)}</span>${hasMok(u.mokjang)?' · <span class="dash-mokjang">'+mokLabel(u.mokjang)+'</span>':''}</div></div>
       </div>
       <button class="logout-btn" onclick="userLogout()">${ic('logout',13)}로그아웃</button>
     </div>
@@ -912,8 +914,8 @@ async function doUserEdit(){
 
 function openMyMokChange(){
   changeMokId=curUser.id;
-  document.getElementById("changeMokTarget").textContent=curUser.name+" · 현재: "+curUser.mokjang;
-  document.getElementById("changeMokSelect").value=curUser.mokjang;
+  document.getElementById("changeMokTarget").textContent=curUser.name+(hasMok(curUser.mokjang)?" · 현재: "+curUser.mokjang:"");
+  document.getElementById("changeMokSelect").value=hasMok(curUser.mokjang)?curUser.mokjang:"";
   openModal("changeMokModal");
 }
 
@@ -929,7 +931,7 @@ async function openNoteById(attId){
   document.getElementById("noteModalContent").innerHTML=`
     <div class="note-header"><h3><span class="yd-headicon">${ic('note',15)}</span>설교 소감문</h3><button class="yd-x" aria-label="닫기" onclick="closeModal('noteModal')">${ic('x',18)}</button></div>
     <div class="note-meta"><span style="color:var(--txt);font-size:14px;font-weight:600">${esc(u.name)}</span>${badge(data.attend_type)}</div>
-    <p style="color:var(--txtM);font-size:12px;margin-bottom:12px">${fmtF(data.friday_date)} · ${mokLabel(u.mokjang)}</p>
+    <p style="color:var(--txtM);font-size:12px;margin-bottom:12px">${fmtF(data.friday_date)}${hasMok(u.mokjang)?' · '+mokLabel(u.mokjang):''}</p>
     <div class="note-body">${bodyHTML}</div>`;
   openModal("noteModal");
 }
@@ -1147,7 +1149,7 @@ async function renderAdmin(){
     </div>`;
 
   if(adminTab==="attend"){
-    const filt=users.filter(u=>!adminSearch||u.name.includes(adminSearch)||u.mokjang.includes(adminSearch));
+    const filt=users.filter(u=>!adminSearch||u.name.includes(adminSearch)||(u.mokjang||'').includes(adminSearch));
     html+=`<div class="type-toggle">
       <button class="type-btn ${adminType==="offline"?"sel-off":""}" onclick="setAdminType('offline')">${ic('church',15)}현장</button>
       <button class="type-btn ${adminType==="online"?"sel-on":""}" onclick="setAdminType('online')">${ic('wifi',15)}온라인</button>
@@ -1163,7 +1165,7 @@ async function renderAdmin(){
         <div class="a-left">
           <div class="a-icon" style="background:${tr?'var(--okD)':'var(--priD)'};color:${tr?'var(--ok)':'var(--priL)'}">${tr?ic('check',18):ic('user',18)}</div>
           <div><div class="a-name">${esc(u.name)} ${tr?badge(tr.attend_type):""} ${tr&&tr.note_preview?'<span class="h-note-icon" style="font-size:10px">'+ic('note',12)+'</span>':""}</div>
-          <div class="a-sub">${u.mokjang} · ${n}회</div></div>
+          <div class="a-sub">${hasMok(u.mokjang)?esc(u.mokjang)+' · ':''}${n}회</div></div>
         </div>
         <button class="btn-sm" style="background:${tr?'var(--okD)':'var(--pri)'};color:${tr?'var(--ok)':'#fff'}" ${tr?"disabled":""} onclick="${tr?"":"openAdminConfirm("+u.id+",'"+esc(u.name)+"')"}">${tr?"완료":"출석"}</button>
       </div>`;
@@ -1177,7 +1179,7 @@ async function renderAdmin(){
     else notes.forEach(a=>{
       const u=userMap[a.user_id]||{name:"?",mokjang:"?"};
       html+=`<div class="a-note-row" style="cursor:default">
-        <div class="a-note-top"><span class="a-note-name">${esc(u.name)} <span style="color:var(--txtM);font-size:11px;font-weight:400">${u.mokjang}</span></span>${badge(a.attend_type)}</div>
+        <div class="a-note-top"><span class="a-note-name">${esc(u.name)} <span style="color:var(--txtM);font-size:11px;font-weight:400">${hasMok(u.mokjang)?esc(u.mokjang):''}</span></span>${badge(a.attend_type)}</div>
         <div class="a-note-preview">${maskedNoteHTML(a.note_preview,a.note_len)}</div>
       </div>`;
     });
@@ -1191,10 +1193,10 @@ async function renderAdmin(){
       html+=`<div class="a-card">
         <div class="a-left"><div class="a-icon" style="background:var(--priD);color:var(--priL)">${ic('user',18)}</div>
         <div><div class="a-name">${esc(u.name)} <span style="color:var(--pri);font-size:14px;font-weight:700;margin-left:4px">${n}회</span></div>
-        <div class="a-sub">${u.mokjang} · ${ic('church',12)}${offN} ${ic('wifi',12)}${onN} · 가입 ${fmtS(u.created_at.split('T')[0])}</div></div></div>
+        <div class="a-sub">${hasMok(u.mokjang)?esc(u.mokjang)+' · ':''}${ic('church',12)}${offN} ${ic('wifi',12)}${onN} · 가입 ${fmtS(u.created_at.split('T')[0])}</div></div></div>
         <div class="a-actions">
-          <button class="btn-sm" style="background:var(--sfL);color:var(--txtM);border:1px solid var(--bd)" onclick="openChangeMokAdmin(${u.id},'${esc(u.name)}','${u.mokjang}')">목장</button>
-          <button class="btn-sm" style="background:var(--adminD);color:var(--admin)" onclick="openResetPw(${u.id},'${esc(u.name)}','${u.mokjang}')">PW</button>
+          <button class="btn-sm" style="background:var(--sfL);color:var(--txtM);border:1px solid var(--bd)" onclick="openChangeMokAdmin(${u.id},'${esc(u.name)}','${esc(u.mokjang||'')}')">목장</button>
+          <button class="btn-sm" style="background:var(--adminD);color:var(--admin)" onclick="openResetPw(${u.id},'${esc(u.name)}','${esc(u.mokjang||'')}')">PW</button>
         </div>
       </div>`;
     });
@@ -1220,14 +1222,14 @@ async function execAdminCheck(){
   closeModal("confirmModal"); renderAdmin();
 }
 
-function openResetPw(id,name,mok){resetId=id;document.getElementById("resetTarget").textContent=name+" ("+mok+")";openModal("resetPwModal")}
+function openResetPw(id,name,mok){resetId=id;document.getElementById("resetTarget").textContent=name+(hasMok(mok)?" ("+mok+")":"");openModal("resetPwModal")}
 async function execResetPw(){
   if(!resetId)return;
   await sb.from('fp_users').update({pw:"1111"}).eq('id',resetId);
   showToast("비밀번호가 1111로 초기화되었습니다");closeModal("resetPwModal");
 }
 
-function openChangeMokAdmin(id,name,mok){changeMokId=id;document.getElementById("changeMokTarget").textContent=name+" · 현재: "+mok;document.getElementById("changeMokSelect").value=mok;openModal("changeMokModal")}
+function openChangeMokAdmin(id,name,mok){changeMokId=id;document.getElementById("changeMokTarget").textContent=name+(hasMok(mok)?" · 현재: "+mok:"");document.getElementById("changeMokSelect").value=hasMok(mok)?mok:"";openModal("changeMokModal")}
 async function execChangeMok(){
   if(!changeMokId)return;
   const nv=document.getElementById("changeMokSelect").value;
