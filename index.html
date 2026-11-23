@@ -733,7 +733,15 @@ const ydFromPortal=()=>{try{return sessionStorage.getItem('yd_from_portal')==='1
 // 청년부에서 들어온 창의 맨 아래 화면이 navStack 의 몇 번째인지. 처음·로그아웃 뒤 = 0(홈), 청년부 go=user/go=admin 으로 연 화면 = 1.
 // 뒤로 가기가 이 화면보다 아래로 내려가려 하면(홈이 보이게 되거나 홈에서 막히면) 청년부 앱으로 보낸다(popstate 처리).
 let ydRootIdx=0;
-const ydToPortal=()=>location.replace(YD_PORTAL);
+// 청년부 앱으로 돌아가기: 이 앱이 쌓은 기록을 끝까지 되감아 실제 '이전 페이지'(청년부 앱)로 간다.
+// 그래야 청년부 앱에서 다시 뒤로 갔을 때 이 앱의 첫 화면이 끼어들지 않는다. 되감을 곳이 없으면(새 창으로 열린 경우) 주소로 간다.
+let ydLeaving=false, ydLeaveT=0;
+function ydToPortal(){
+  ydLeaving=true; clearTimeout(ydLeaveT);
+  ydLeaveT=setTimeout(()=>{if(ydLeaving)location.replace(YD_PORTAL)},1500);
+  history.back();
+}
+window.addEventListener('pagehide',()=>{ydLeaving=false;clearTimeout(ydLeaveT)});
 // 첫 화면은 지난번 확인한 역할로 바로 그린다(깜빡임 방지). 토큰이 없으면 숨김. 서버 확인이 오면 ydCheckSession 이 고친다.
 let ydRoles=ydStore.get(YD_TOKEN_KEY)?ydCachedRoles():[];
 ydShowAdminEntry(ydCanAdminNow());
@@ -796,6 +804,7 @@ function closeModal(id){
 }
 function goBack(){history.back()}
 window.addEventListener("popstate",function(){
+  if(ydLeaving){ydToPortal();return}   // 청년부 앱으로 되감는 중: 화면을 바꾸지 않고 계속 뒤로
   if(skipNextPop){skipNextPop=false;return}
   if(openModals.length>0){openModals.pop();const els=document.querySelectorAll('.overlay.show');if(els.length)els[els.length-1].classList.remove('show');return}
   // 여디디야청년부에서 들어온 창: 맨 아래 화면에서 더 뒤로 가면 이 앱의 홈 대신 청년부 앱으로(화면은 바꾸지 않고 바로 이동)
@@ -807,7 +816,7 @@ window.addEventListener("popstate",function(){
 if(ydEntry)history.replaceState({page:"homePage"},"",ydEntry.url); else history.replaceState({page:"homePage"},"");
 history.pushState({guard:true},"");
 // 뒤로·앞으로 가기로 관리자 화면에 다시 왔는데 canAdmin 이 아니면 홈으로 (위 popstate 처리 다음에 돈다)
-window.addEventListener("popstate",()=>{if(ydAdminShowing()&&!ydCanAdminNow())adminLogout()});
+window.addEventListener("popstate",()=>{if(ydLeaving)return;if(ydAdminShowing()&&!ydCanAdminNow())adminLogout()});
 
 // ═══════════ 로그인 ═══════════
 document.getElementById("loginPw").addEventListener("keydown",e=>{if(e.key==="Enter")doUserLogin()});
