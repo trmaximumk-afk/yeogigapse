@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0F2442">
 <!-- 앱 버전: 배포할 때마다 올릴 것 (열려 있던 옛 화면에 새로고침 안내가 뜸) -->
-<meta name="app-version" content="2026-11-24.1">
+<meta name="app-version" content="2026-11-24.2">
 <title>정원 × 여기갑세</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -420,11 +420,13 @@ optgroup{color:var(--yd-navy-700)}
       <p class="sub">가입 후 매주 금요기도회 출석체크를 할 수 있습니다</p>
       <div class="field"><label>이름 *</label><input type="text" id="regName" placeholder="홍길동"></div>
       <div class="field"><label>목장 선택 *</label>
+        <!-- 아래 목록은 기본값. 앱이 열리면 DB 함수 yd_mokjang_list()(두빛나래 명단)의 목록으로 바꿔 채운다 -->
         <select id="regMokjang"><option value="" disabled selected>목장을 선택하세요</option>
           <optgroup label="여디"><option>예장연</option><option>미정</option><option>하이킹</option><option>예아</option></optgroup>
           <optgroup label="디야"><option>디야로</option><option>형누나</option><option>빛과소금빵</option><option>에너자이저</option></optgroup>
           <optgroup label="특별"><option>새가족</option><option>새내기</option></optgroup>
         </select>
+        <p style="color:var(--txtM);font-size:11px;line-height:1.5;margin-top:6px"><i data-yd="info" data-s="12"></i> 두빛나래 여디디야 명단에 있는 이름이면 가입 뒤 그 명단의 목장으로 자동으로 맞춰집니다.</p>
       </div>
       <div class="field"><label>비밀번호 (숫자 4자리) *</label><input type="password" id="regPw" maxlength="4" placeholder="예: 1234" inputmode="numeric" style="letter-spacing:6px;text-align:center"></div>
       <div class="field"><label>비밀번호 확인</label><input type="password" id="regPw2" maxlength="4" placeholder="비밀번호 재입력" inputmode="numeric" style="letter-spacing:6px;text-align:center"></div>
@@ -517,11 +519,13 @@ optgroup{color:var(--yd-navy-700)}
   <div class="modal" onclick="event.stopPropagation()">
     <h3><span class="yd-headicon navy"><i data-yd="home" data-s="15"></i></span>목장 변경</h3><p class="desc" id="changeMokTarget"></p>
     <div class="field"><label>새 목장</label>
+      <!-- 기본값. 앱이 열리면 yd_mokjang_list() 목록으로 바꿔 채운다 -->
       <select id="changeMokSelect">
         <optgroup label="여디"><option>예장연</option><option>미정</option><option>하이킹</option><option>예아</option></optgroup>
         <optgroup label="디야"><option>디야로</option><option>형누나</option><option>빛과소금빵</option><option>에너자이저</option></optgroup>
         <optgroup label="특별"><option>새가족</option><option>새내기</option></optgroup>
       </select>
+      <p style="color:var(--txtM);font-size:11px;line-height:1.5;margin-top:6px"><i data-yd="info" data-s="12"></i> 두빛나래 명단에 있는 사람은 두빛나래 목장이 우선합니다. 바꾸려면 두빛나래에서 고쳐 주세요.</p>
     </div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('changeMokModal')">취소</button><button style="background:var(--pri);color:#fff" onclick="execChangeMok()">변경</button></div>
   </div>
@@ -594,8 +598,62 @@ const ADMIN_PIN = "2026";
 // ═══════════ 정원(온라인 기도회) 설정 ═══════════
 const GARDEN_MEET_DEFAULT='https://meet.google.com/nco-bnnm-igs';
 const VAPID_PUBLIC='BOj9STiII0hyK1zPNOAxxD6sxNTc6vgSiCnK6Me7RaKTWpTW0vj71cmHuZLEr-RTfid1BmhGLod7g0jEKPIOxeg';
-const DIYA_MOK=['디야로','형누나','빛과소금빵','에너자이저'];
-const YEDI_MOK=['예장연','미정','하이킹','예아'];
+// 정원 대상 범위용 목장 묶음. 기본값(목록을 못 받았을 때) → loadMokList()가 받은 목록으로 바꾼다.
+let DIYA_MOK=['디야로','형누나','빛과소금빵','에너자이저'];
+let YEDI_MOK=['예장연','미정','하이킹','예아'];
+
+// ═══════════ 목장 목록 (두빛나래 교적관리 명단) ═══════════
+// 목장 이름은 두빛나래 명단을 옮겨 오는 DB 함수 yd_mokjang_list()에서 받는다: [{name,grp}], 여디→디야→특별 순.
+// 앱을 열 때 한 번만 받는다. 못 받거나 빈 목록이면 HTML의 기본 목록과 위 DIYA_MOK·YEDI_MOK를 그대로 쓴다.
+let MOK_LIST=null, mokReady=null;
+async function loadMokList(){
+  try{
+    let{data,error}=await sb.rpc('yd_mokjang_list');
+    if(typeof data==='string'){try{data=JSON.parse(data)}catch(_){data=null}}
+    if(error||!Array.isArray(data))return;
+    const seen=new Set(), list=[];
+    data.forEach(x=>{
+      const name=x&&typeof x.name==='string'?x.name.trim():'';
+      if(!name||seen.has(name))return;
+      seen.add(name); list.push({name,grp:String((x&&x.grp)||'').trim()});
+    });
+    if(!list.length)return;
+    MOK_LIST=list;
+    const diya=list.filter(x=>x.grp==='디야').map(x=>x.name), yedi=list.filter(x=>x.grp==='여디').map(x=>x.name);
+    if(diya.length)DIYA_MOK=diya;
+    if(yedi.length)YEDI_MOK=yedi;
+    fillMokSelect('regMokjang'); fillMokSelect('changeMokSelect');
+  }catch(e){}
+}
+// select 안의 목장 옵션을 받은 목록으로 다시 채운다(grp별 optgroup). 가입 화면의 "목장을 선택하세요"는 남긴다.
+function fillMokSelect(id){
+  const sel=document.getElementById(id); if(!sel||!MOK_LIST)return;
+  const cur=sel.value, ph=sel.querySelector('option[value=""]');
+  const groups=new Map();
+  MOK_LIST.forEach(x=>{const g=x.grp||'기타'; if(!groups.has(g))groups.set(g,[]); groups.get(g).push(x.name);});
+  sel.textContent='';
+  if(ph)sel.appendChild(ph);
+  groups.forEach((names,g)=>{
+    const og=document.createElement('optgroup'); og.label=g;
+    names.forEach(n=>{const o=document.createElement('option'); o.textContent=n; og.appendChild(o);});
+    sel.appendChild(og);
+  });
+  if(cur&&MOK_LIST.some(x=>x.name===cur))sel.value=cur; else if(ph)ph.selected=true;
+}
+// "에너자이저 A"처럼 끝에 붙은 분반 표시(공백 + 영문 한 글자나 숫자 한 자리)를 뗀 이름
+const mokBase=m=>String(m||'').trim().replace(/\s+[A-Za-z0-9]$/,'');
+// 목장이 속한 마을: '디야' / '여디' / ''(미배정·특별·모르는 이름). 이름이 그대로 없으면 분반 표시를 떼고 비교한다.
+function mokGrp(mok){
+  const m=String(mok||'').trim(); if(!m)return '';
+  if(DIYA_MOK.includes(m))return '디야';
+  if(YEDI_MOK.includes(m))return '여디';
+  const b=mokBase(m);
+  if(DIYA_MOK.some(x=>mokBase(x)===b))return '디야';
+  if(YEDI_MOK.some(x=>mokBase(x)===b))return '여디';
+  return '';
+}
+// 화면 표시: "디야로 목장", 비어 있거나 미배정이면 "목장 미배정"
+const mokLabel=m=>(!m||m==='미배정')?'목장 미배정':esc(m)+' 목장';
 
 // ═══════════ 금요일 날짜 시스템 ═══════════
 const FIRST_FRIDAY='2026-05-08'; // 첫 출석 가능 금요일
@@ -731,7 +789,7 @@ async function renderUserDash(){
     <div class="dash-header yd-hd">
       <div class="dash-user">
         <img class="yd-hd-sym" src="yd/brand/church-symbol-light.svg" alt="" draggable="false">
-        <div><div class="yd-hd-title yd-serif">정원 × 여기갑세</div><div class="dash-who"><span class="dash-name">${esc(u.name)}</span> · <span class="dash-mokjang">${u.mokjang} 목장</span></div></div>
+        <div><div class="yd-hd-title yd-serif">정원 × 여기갑세</div><div class="dash-who"><span class="dash-name">${esc(u.name)}</span> · <span class="dash-mokjang">${mokLabel(u.mokjang)}</span></div></div>
       </div>
       <button class="logout-btn" onclick="userLogout()">${ic('logout',13)}로그아웃</button>
     </div>
@@ -871,7 +929,7 @@ async function openNoteById(attId){
   document.getElementById("noteModalContent").innerHTML=`
     <div class="note-header"><h3><span class="yd-headicon">${ic('note',15)}</span>설교 소감문</h3><button class="yd-x" aria-label="닫기" onclick="closeModal('noteModal')">${ic('x',18)}</button></div>
     <div class="note-meta"><span style="color:var(--txt);font-size:14px;font-weight:600">${esc(u.name)}</span>${badge(data.attend_type)}</div>
-    <p style="color:var(--txtM);font-size:12px;margin-bottom:12px">${fmtF(data.friday_date)} · ${u.mokjang} 목장</p>
+    <p style="color:var(--txtM);font-size:12px;margin-bottom:12px">${fmtF(data.friday_date)} · ${mokLabel(u.mokjang)}</p>
     <div class="note-body">${bodyHTML}</div>`;
   openModal("noteModal");
 }
@@ -888,8 +946,9 @@ function gardenDateLabel(ds){ const[y,m,d]=ds.split('-').map(Number); const wd=W
 function gardenChipLabel(ds){ const[,m,d]=ds.split('-').map(Number); return `${m}/${d}`; }
 function scopeAllows(scope,mok){
   if(scope==='all')return true;
-  if(scope==='diya_yedi')return DIYA_MOK.includes(mok)||YEDI_MOK.includes(mok);
-  return DIYA_MOK.includes(mok); // 기본 diya
+  const g=mokGrp(mok); // 미배정·모르는 이름은 '' → 디야·여디 어느 쪽도 아님
+  if(scope==='diya_yedi')return g==='디야'||g==='여디';
+  return g==='디야'; // 기본 diya
 }
 async function loadGardenCfg(){
   try{ const{data}=await sb.from('gd_config').select('key,value'); const o={}; (data||[]).forEach(r=>o[r.key]=r.value); return o; }
@@ -924,6 +983,7 @@ function openGardenMeet(){
 
 async function gardenTabHTML(){
   if(gardenCfg===null) gardenCfg=await loadGardenCfg();
+  if(mokReady) await Promise.race([mokReady,new Promise(r=>setTimeout(r,3000))]); // 목장 목록을 받는 중이면 잠깐(최대 3초) 기다림
   const scope=(gardenCfg&&gardenCfg.scope)?gardenCfg.scope:'diya';
   const allowed=scopeAllows(scope,curUser.mokjang);
   const today=gardenTodayDate();
@@ -1171,6 +1231,7 @@ function openChangeMokAdmin(id,name,mok){changeMokId=id;document.getElementById(
 async function execChangeMok(){
   if(!changeMokId)return;
   const nv=document.getElementById("changeMokSelect").value;
+  if(!nv){showToast("새 목장을 선택하세요","bad");return} // 현재 목장(예: 미배정)이 목록에 없으면 선택칸이 비어 있음
   await sb.from('fp_users').update({mokjang:nv}).eq('id',changeMokId);
   if(curUser&&curUser.id===changeMokId){curUser.mokjang=nv;renderUserDash()}
   showToast("목장이 "+nv+"(으)로 변경되었습니다");closeModal("changeMokModal");renderAdmin();
@@ -1195,6 +1256,7 @@ window.addEventListener("pageshow",e=>{if(e.persisted)checkAppVersion()});
 
 // ═══════════ 초기화 ═══════════
 registerSW();
+mokReady=loadMokList();
 setTimeout(checkAppVersion,5000);
 </script>
 </body>
