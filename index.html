@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0F2442">
 <!-- 앱 버전: 배포할 때마다 올릴 것 (열려 있던 옛 화면에 새로고침 안내가 뜸) -->
-<meta name="app-version" content="2026-11-24.3">
+<meta name="app-version" content="2026-11-24.4">
 <title>정원 × 여기갑세</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -106,6 +106,9 @@ optgroup{font-weight:700;color:var(--priL)}
 #homePage .btn-ghost .home-ic{background:rgba(220,194,134,.10);box-shadow:inset 0 0 0 1px rgba(220,194,134,.40);color:var(--yd-gold-300)}
 .home-lb{flex:1}
 .home-chev{opacity:.45}
+/* 관리자 입장(구분선+버튼): 여디디야청년부에서 사역자·임원으로 확인된 기기에서만 보인다. 기본은 숨김 */
+#homePage .home-admin{display:none}
+#homePage.can-admin .home-admin{display:flex}
 
 .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .dash-user{display:flex;align-items:center;gap:8px}
@@ -388,8 +391,8 @@ optgroup{color:var(--yd-navy-700)}
       <div class="home-actions">
         <button class="btn btn-pri" onclick="showPage('loginPage')"><span class="home-ic"><i data-yd="login" data-s="19"></i></span><span class="home-lb yd-serif">로그인</span><span class="home-chev"><i data-yd="chevright" data-s="18"></i></span></button>
         <button class="btn btn-acc" onclick="showPage('registerPage')"><span class="home-ic"><i data-yd="userplus" data-s="19"></i></span><span class="home-lb yd-serif">회원가입</span><span class="home-chev"><i data-yd="chevright" data-s="18"></i></span></button>
-        <div class="home-divider"><span class="yd-gold-rule"></span><b>관리자</b><span class="yd-gold-rule"></span></div>
-        <button class="btn btn-ghost" onclick="showPage('adminLoginPage')"><span class="home-ic"><i data-yd="shield" data-s="19"></i></span><span class="home-lb yd-serif">관리자 입장</span><span class="home-chev"><i data-yd="chevright" data-s="18"></i></span></button>
+        <div class="home-divider home-admin"><span class="yd-gold-rule"></span><b>관리자</b><span class="yd-gold-rule"></span></div>
+        <button class="btn btn-ghost home-admin" onclick="showPage('adminLoginPage')"><span class="home-ic"><i data-yd="shield" data-s="19"></i></span><span class="home-lb yd-serif">관리자 입장</span><span class="home-chev"><i data-yd="chevright" data-s="18"></i></span></button>
       </div>
     </div>
   </div>
@@ -718,6 +721,81 @@ function maskedNoteHTML(preview,len){
 
 function showToast(msg,type="ok"){const el=document.getElementById("toast");el.textContent=msg;el.insertAdjacentHTML("afterbegin",ic(type==="bad"?"alert":"checkcircle",15));el.className="toast "+type+" show";clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2500)}
 
+// ═══════════ 여디디야청년부 연결 (2026-11-24) ═══════════
+// 여디디야청년부 앱이 로그인한 사람을 https://yeogigapse.vercel.app/#yd=<토큰>&go=<user|admin> 으로 보낸다.
+// 토큰은 이 기기에 yd_token 으로 남기고, DB 함수 yd_portal_session(p_token)으로 그 사람의 역할을 받아 yd_roles 에 남긴다.
+// 홈의 '관리자' 구분선과 '관리자 입장' 버튼은 역할에 사역자(staff)나 임원(officer)이 있을 때만 보인다(기본은 숨김).
+// 관리자 PIN은 그대로 필요하다. 로그아웃(userLogout·adminLogout)은 토큰을 지우지 않는다.
+const YD_TOKEN_KEY='yd_token', YD_ROLES_KEY='yd_roles';
+const ydStore={
+  get(k){try{return localStorage.getItem(k)}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,v)}catch(e){}},
+  del(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+const ydCanAdmin=roles=>Array.isArray(roles)&&(roles.includes('staff')||roles.includes('officer'));
+function ydCachedRoles(){
+  try{const r=JSON.parse(ydStore.get(YD_ROLES_KEY)||'null');return Array.isArray(r)?r.filter(x=>typeof x==='string'):[]}catch(e){return []}
+}
+function ydShowAdminEntry(on){document.getElementById('homePage').classList.toggle('can-admin',!!on)}
+// 주소의 #yd=…&go=… 를 읽는다(yd 가 없으면 null). 주소에서 지우는 일은 아래 History API 초기화(replaceState)가 한다.
+const ydEntry=(()=>{
+  const raw=location.hash.replace(/^#/,''); if(!raw)return null;
+  let token=null, go=''; const keep=[];
+  raw.split('&').forEach(s=>{
+    const i=s.indexOf('='), k=i<0?s:s.slice(0,i); let v=i<0?'':s.slice(i+1);
+    try{v=decodeURIComponent(v)}catch(e){}
+    if(k==='yd')token=v.trim(); else if(k==='go')go=v.trim(); else if(s)keep.push(s);
+  });
+  if(token===null)return null;
+  return {token,go,url:location.pathname+location.search+(keep.length?'#'+keep.join('&'):'')};
+})();
+if(ydEntry&&ydEntry.token){
+  // 다른 토큰으로 들어오면 앞 사람의 역할 기억은 버린다(한 기기를 여럿이 쓰는 경우)
+  if(ydStore.get(YD_TOKEN_KEY)!==ydEntry.token)ydStore.del(YD_ROLES_KEY);
+  ydStore.set(YD_TOKEN_KEY,ydEntry.token);
+}
+// 첫 화면은 지난번 확인한 역할로 바로 그린다(깜빡임 방지). 토큰이 없으면 숨김. 서버 확인이 오면 ydCheckSession 이 고친다.
+let ydRoles=ydStore.get(YD_TOKEN_KEY)?ydCachedRoles():[];
+ydShowAdminEntry(ydCanAdmin(ydRoles));
+
+// 토큰 확인: ok:true → 역할 저장, ok:false → 토큰·역할 지움, 네트워크·함수 오류 → 기억해 둔 역할 그대로(null 반환)
+async function ydCheckSession(){
+  const token=ydStore.get(YD_TOKEN_KEY); if(!token)return null;
+  let data=null;
+  try{
+    const r=await sb.rpc('yd_portal_session',{p_token:token});
+    if(r.error)return null;
+    data=r.data;
+    if(typeof data==='string'){try{data=JSON.parse(data)}catch(_){data=null}}
+  }catch(e){return null}
+  if(!data||typeof data!=='object')return null;
+  if(data.ok===false){ydStore.del(YD_TOKEN_KEY);ydStore.del(YD_ROLES_KEY);ydRoles=[];ydShowAdminEntry(false);return data}
+  if(data.ok!==true)return null;
+  ydRoles=Array.isArray(data.roles)?data.roles.filter(x=>typeof x==='string'):[];
+  ydStore.set(YD_ROLES_KEY,JSON.stringify(ydRoles));
+  ydShowAdminEntry(ydCanAdmin(ydRoles));
+  return data;
+}
+// go=user: 그 사람으로 바로 로그인(doUserLogin 성공과 같은 상태, fp_users 행을 id로 받음). 못 받으면 홈 그대로.
+// go=admin: 사역자·임원이면 관리자 PIN 화면(PIN은 그대로 입력). 아니면 홈 그대로.
+// 확인을 기다리는 사이 사용자가 홈에서 다른 화면으로 움직였으면 아무것도 바꾸지 않는다.
+async function ydStart(){
+  const sess=await ydCheckSession();
+  const go=ydEntry&&ydEntry.token?ydEntry.go:'';
+  if(!go||curUser||navStack.length!==1)return;
+  if(go==='user'){
+    const id=sess&&sess.ok===true&&sess.user?sess.user.id:null;
+    if(id===null||id===undefined)return;
+    try{
+      const{data,error}=await sb.from('fp_users').select('*').eq('id',id);
+      if(error||!data||data.length===0||curUser||navStack.length!==1)return;
+      curUser=data[0]; showPage("userDash"); renderUserDash();
+    }catch(e){}
+  }else if(go==='admin'&&ydCanAdmin(ydRoles))showPage('adminLoginPage');
+}
+// 앱이 열려 있는 창에 주소의 #yd= 만 바뀌어 들어오면(같은 문서 안 이동) 새로 불러 처음 연 것처럼 처리한다
+window.addEventListener("hashchange",()=>{if(/^#(.*&)?yd=/.test(location.hash))location.reload()});
+
 // ═══════════ History API ═══════════
 let navStack=["homePage"], openModals=[], skipNextPop=false;
 function showPage(id,push=true){
@@ -742,7 +820,9 @@ window.addEventListener("popstate",function(){
   if(navStack.length>1){navStack.pop();const prev=navStack[navStack.length-1];document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(prev).classList.add("active");window.scrollTo(0,0)}
   else history.pushState({guard:true},"");
 });
-history.replaceState({page:"homePage"},"");history.pushState({guard:true},"");
+// 여디디야청년부에서 #yd=…&go=… 로 왔으면 첫 기록을 바꿀 때 그 부분을 주소에서 뺀다(뒤로 가기 기록에도 토큰이 남지 않음)
+if(ydEntry)history.replaceState({page:"homePage"},"",ydEntry.url); else history.replaceState({page:"homePage"},"");
+history.pushState({guard:true},"");
 
 // ═══════════ 로그인 ═══════════
 document.getElementById("loginPw").addEventListener("keydown",e=>{if(e.key==="Enter")doUserLogin()});
@@ -1259,6 +1339,7 @@ window.addEventListener("pageshow",e=>{if(e.persisted)checkAppVersion()});
 // ═══════════ 초기화 ═══════════
 registerSW();
 mokReady=loadMokList();
+ydStart();
 setTimeout(checkAppVersion,5000);
 </script>
 </body>
